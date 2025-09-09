@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Supply extends Model
+{
+
+    use SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'address',
+        'is_active'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'supplier_id' . 'id');
+    }
+}

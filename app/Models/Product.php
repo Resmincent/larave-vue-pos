@@ -2,16 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use PurchaseItem;
 
 class Product extends Model
 {
     use SoftDeletes;
 
-    use HasFactory;
 
     protected $fillable = [
         'sku',
@@ -26,12 +24,12 @@ class Product extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
     public function tax()
     {
-        return $this->belongsTo(Tax::class);
+        return $this->belongsTo(Tax::class, 'tax_id', 'id');
     }
 
     public function stocks()
@@ -39,8 +37,13 @@ class Product extends Model
         return $this->hasMany(StockMovement::class);
     }
 
-    public function sale_items()
+    public function saleItems()
     {
-        return $this->hasMany(SaleItem::class);
+        return $this->hasMany(SaleItem::class, 'product_id', 'id');
+    }
+
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class, 'product_id', 'id');
     }
 }
