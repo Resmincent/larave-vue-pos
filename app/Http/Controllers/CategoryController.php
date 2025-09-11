@@ -11,9 +11,9 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->string('search');
+        $query = $request->string('query');
         $categories = Category::with('parent')
-            ->when($search, fn($query) => $query->where('name', 'like', "%$search%"))
+            ->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -22,7 +22,7 @@ class CategoryController extends Controller
             'Categories/Index',
             [
                 'categories' => $categories,
-                'filters' => ['search' => $search],
+                'filters' => ['query' => $query],
             ]
         );
     }

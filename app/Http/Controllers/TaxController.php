@@ -9,15 +9,15 @@ class TaxController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->string('search');
-        $taxes = Tax::when($search, fn($query) => $query->where('name', 'like', "%$search%"))
+        $query = $request->string('query');
+        $taxes = Tax::when($query, fn($w) => $w->where('name', 'like', "%$query%"))
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('Taxes/Index', [
             'taxes' => $taxes,
-            'filters' => ['search' => $search],
+            'filters' => ['query' => $query],
         ]);
     }
 

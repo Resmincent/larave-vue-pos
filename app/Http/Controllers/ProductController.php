@@ -15,9 +15,9 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->string('search');
+        $query = $request->string('query');
         $products = Product::with(['category', 'tax'])
-            ->when($search, fn($query) => $query->where('name', 'like', "%$search%"))
+            ->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -26,7 +26,7 @@ class ProductController extends Controller
             'Products/Index',
             [
                 'products' => $products,
-                'filters' => ['search' => $search],
+                'filters' => ['query' => $query],
             ]
         );
     }
