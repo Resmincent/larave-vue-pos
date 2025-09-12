@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Product;
-use App\Models\Tax;
+use App\Models\{Category, Product, Tax};
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ProductController extends Controller
-{
+class ProductController extends Controller {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $query = $request->string('query');
         $products = Product::with(['category', 'tax'])
             ->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
@@ -34,8 +30,7 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
+    public function create() {
         return Inertia::render('Products/Create', [
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'taxes' => Tax::orderBy('name')->get(['id', 'name', 'rate']),
@@ -46,8 +41,7 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $data = $request->validate([
             'sku' => 'nullable|string|max:20',
             'name' => 'required|string|max:100',
@@ -66,8 +60,7 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
-    {
+    public function edit(Product $product) {
         return Inertia::render('Products/Edit', [
             'product' => $product->load(['category', 'tax']),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
@@ -79,8 +72,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
-    {
+    public function update(Request $request, Product $product) {
         $data = $request->validate([
             'sku' => 'nullable|string|max:20',
             'name' => 'required|string|max:100',
@@ -99,8 +91,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
-    {
+    public function destroy(Product $product) {
         $product->delete();
         return redirect()->back()->with('success', 'Product deleted successfully');
     }

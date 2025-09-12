@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Customer;
-use App\Models\SaleItem;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\{Customer, SaleItem, User};
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
-class Sale extends Model
-{
+
+class Sale extends Model {
 
     use SoftDeletes;
 
@@ -35,23 +32,19 @@ class Sale extends Model
     public const STATUS_VOID = 'VOID';
 
 
-    public function customer()
-    {
+    public function customer() {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function saleItems()
-    {
+    public function saleItems() {
         return $this->hasMany(SaleItem::class, 'sale_id', 'id');
     }
 
-    public function payments()
-    {
+    public function payments() {
         return $this->hasMany(Payment::class, 'sale_id', 'id');
     }
 }

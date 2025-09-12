@@ -1,21 +1,13 @@
 <?php
 
 use App\Http\Controllers\Controller;
-use App\Models\Inventory;
-use App\Models\Product;
-use App\Models\Purchase;
-use App\Models\PurchaseItem;
-use App\Models\StockMovement;
-use App\Models\Supply;
+use App\Models\{Inventory, Product, Purchase, PurchaseItem, StockMovement, Supply};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{Auth, DB};
 use Inertia\Inertia;
 
-class PurchaseController extends Controller
-{
-    public function index(Request $request)
-    {
+class PurchaseController extends Controller {
+    public function index(Request $request) {
         $query = $request->string('query');
         $purchases = Purchase::with(['supplier', 'user'])
             ->when($query, fn($w) => $w->where('code', 'like', "%$query%"))
@@ -29,8 +21,7 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function create()
-    {
+    public function create() {
         return Inertia('Purchases/Create', [
             'suppliers' => Supply::orderBy('name')->get(['id', 'name']),
             'products' => Product::orderBy('name')->get(['id', 'name', 'sku', 'cost_price', 'sell_price', 'unit']),
@@ -42,8 +33,7 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $data = $request->validate([
             'supplier_id' => 'nullable|exists:suppliers,id',
             'code' => 'required|string|unique:purchases,code',
@@ -125,8 +115,7 @@ class PurchaseController extends Controller
         return redirect()->route('purchases.index')->with('success', 'Purchase created successfully');
     }
 
-    public function show(Purchase $purchase)
-    {
+    public function show(Purchase $purchase) {
         $purchase->load([
             'supplier:id,name',
             'user:id,name',
