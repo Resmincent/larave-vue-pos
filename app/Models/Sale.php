@@ -30,6 +30,10 @@ class Sale extends Model
 
     protected $casts = ['sold_at' => 'datetime'];
 
+    public const STATUS_OPEN = 'OPEN';
+    public const STATUS_PAID = 'PAID';
+    public const STATUS_VOID = 'VOID';
+
 
     public function customer()
     {

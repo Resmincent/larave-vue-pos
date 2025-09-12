@@ -31,6 +31,8 @@ class Purchase extends Model
         'discount_total' => 'decimal:2',
         'tax_total' => 'decimal:2',
         'grand_total' => 'decimal:2',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public const STATUS_DRAFT = 'DRAFT';

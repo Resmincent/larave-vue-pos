@@ -12,7 +12,7 @@ class PurchaseItem extends Model
         'purchase_id',
         'product_id',
         'qty',
-        'const_price',
+        'cost_price',
         'discount',
         'tax',
         'line_total',
