@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
-class Supply extends Model
-{
+
+class Supply extends Model {
 
 
     use SoftDeletes;
@@ -23,8 +22,7 @@ class Supply extends Model
         'is_active' => 'boolean',
     ];
 
-    public function purchases()
-    {
+    public function purchases() {
         return $this->hasMany(Purchase::class, 'supplier_id' . 'id');
     }
 }

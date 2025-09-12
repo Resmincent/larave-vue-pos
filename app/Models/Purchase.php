@@ -4,11 +4,10 @@ namespace App\Models;
 
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
-class Purchase extends Model
-{
+
+class Purchase extends Model {
 
     use SoftDeletes;
 
@@ -39,17 +38,14 @@ class Purchase extends Model
     public const STATUS_RECEIVED = 'RECEIVED';
     public const STATUS_CANCELLED = 'CANCELLED';
 
-    public function supplier()
-    {
+    public function supplier() {
         return $this->belongsTo(Supply::class, 'supplier_id', 'id');
     }
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function purchaseItems()
-    {
+    public function purchaseItems() {
         return $this->hasMany(PurchaseItem::class, 'purchase_id', 'id');
     }
 }

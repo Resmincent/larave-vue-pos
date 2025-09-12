@@ -1,18 +1,13 @@
 <?php
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use App\Models\PaymentMethod;
-use App\Models\Product;
-use App\Models\Sale;
+use App\Models\{Customer, PaymentMethod, Product, Sale};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-class SaleController extends Controller
-{
-    public function index(Request $request)
-    {
+class SaleController extends Controller {
+    public function index(Request $request) {
         $query = $request->string('query');
         $sales = Sale::with(['customer', 'user'])->when($query, fn($w) => $w->where('code', 'like', "%$query%"))
             ->orderBy('sold_at', 'desc')
@@ -25,8 +20,7 @@ class SaleController extends Controller
         ]);
     }
 
-    public function create()
-    {
+    public function create() {
         return Inertia::render('Sales/Create', [
             'customers' => Customer::orderBy('name')->get(['id', 'name']),
             'products' => Product::orderBy('name')->get(['id', 'sku', 'sell_price', 'unit']),
@@ -34,8 +28,7 @@ class SaleController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $data = $request->validate([
             'customer_id' => 'nullable|exists:customers,id',
             'code' => 'required|string|unique:sales,code',

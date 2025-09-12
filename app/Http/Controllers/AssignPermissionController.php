@@ -3,21 +3,17 @@
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\{Permission, Role};
 
-class AssignPermissionController extends Controller
-{
-    public function index()
-    {
+class AssignPermissionController extends Controller {
+    public function index() {
         return Inertia::render('AssignPermission/Index', [
             'roles' => Role::all(),
             'permissions' => Permission::all(),
         ]);
     }
 
-    public function editRolePermissions(Role $role)
-    {
+    public function editRolePermissions(Role $role) {
         $permissions = Permission::all();
         $raw_role_permissions = $role->permissions()->get()->toArray();
         $role_permissions = [];
@@ -31,8 +27,7 @@ class AssignPermissionController extends Controller
         ]);
     }
 
-    public function updateRolePermissions(Request $request)
-    {
+    public function updateRolePermissions(Request $request) {
         $request->validate([
             'role_id' => 'required|exists:roles,id',
             'update_role_permissions' => 'required|array',

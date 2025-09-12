@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inventory;
-use App\Models\Product;
-use App\Models\StockMovement;
+use App\Models\{Inventory, Product, StockMovement};
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
 
-class InventoryController extends Controller
-{
-    public function index(Request $request)
-    {
+class InventoryController extends Controller {
+    public function index(Request $request) {
         $query = $request->string('query');
         $inventories = Inventory::with('product: id, name, sku, unit')
             ->when($query, fn($w) =>
@@ -29,8 +25,7 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function adjustForm(Product $product)
-    {
+    public function adjustForm(Product $product) {
         $inventory = Inventory::firstOrCreate(
             ['product_id' => $product->id],
             ['qty' => 0]
@@ -41,8 +36,7 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function asjust(Request $request, Product $product)
-    {
+    public function asjust(Request $request, Product $product) {
         $data = $request->validate([
             'qty_change' => ['required', 'integer', 'not_in:0'],
             'note' => ['nullable', 'string', 'max:255'],

@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
-class Product extends Model
-{
+class Product extends Model {
     use SoftDeletes;
 
 
@@ -21,28 +19,23 @@ class Product extends Model
         'is_active'
     ];
 
-    public function category()
-    {
+    public function category() {
         return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
-    public function tax()
-    {
+    public function tax() {
         return $this->belongsTo(Tax::class, 'tax_id', 'id');
     }
 
-    public function stocks()
-    {
+    public function stocks() {
         return $this->hasMany(StockMovement::class);
     }
 
-    public function saleItems()
-    {
+    public function saleItems() {
         return $this->hasMany(SaleItem::class, 'product_id', 'id');
     }
 
-    public function purchaseItems()
-    {
+    public function purchaseItems() {
         return $this->hasMany(PurchaseItem::class, 'product_id', 'id');
     }
 }
