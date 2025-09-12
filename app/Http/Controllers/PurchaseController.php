@@ -132,8 +132,11 @@ class PurchaseController extends Controller
             'user:id,name',
             'items.product:id,name,sku,unit',
         ]);
-        return Inertia('Purchases/Show', [
-            'purchase' => $purchase,
-        ]);
+        return Inertia(
+            'Purchases/Show',
+            [
+                'purchase' => $purchase,
+            ]
+        );
     }
 }
