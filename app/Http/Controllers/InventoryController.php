@@ -41,7 +41,7 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function asjust(Request $request, Product $product)
+    public function adjust(Request $request, Product $product)
     {
         $data = $request->validate([
             'qty_change' => ['required', 'integer', 'not_in:0'],

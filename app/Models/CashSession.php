@@ -33,4 +33,8 @@ class CashSession extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'cash_session_id', 'id');
+    }
 }

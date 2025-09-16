@@ -172,7 +172,7 @@ class SaleController extends Controller
         );
     }
 
-    public function void(Request $request, Sale $sale)
+    public function void(Sale $sale)
     {
         DB::transaction(function () use ($sale) {
             if ($sale->status === Sale::STATUS_PAID) {
