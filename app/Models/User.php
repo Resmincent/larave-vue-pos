@@ -64,4 +64,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(CashSession::class, 'user_id', 'id');
     }
+
+    public function generateCustomId()
+    {
+
+        $role = $this->roles->first();
+
+        $prefix = 'DEFAULT';
+        if ($role) {
+            $prefix = strtoupper(substr($role->name, 0, 5));
+        }
+
+        $sequenceNumber = mt_rand(001, 999);
+        $sequenceNumber = sprintf('%03d', mt_rand(001, 999));
+        $custom_id = $prefix . $sequenceNumber;
+        while (self::where('id', $custom_id)->exists()) {
+            $sequenceNumber = mt_rand(001, 999);
+            $custom_id = $prefix . $sequenceNumber;
+        }
+        return $custom_id;
+    }
 }

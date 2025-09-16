@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
     Route::resource('purchases', PurchaseController::class);
+    Route::resource('users', UserController::class);
 
     // Inventories
     Route::get('inventories', [InventoryController::class, 'index'])->name('inventories.index');
