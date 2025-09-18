@@ -18,7 +18,7 @@ class TaxController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Taxes/Index', [
+        return Inertia::render('taxes/Index', [
             'taxes' => $taxes,
             'filters' => ['query' => $query],
         ]);
@@ -26,7 +26,7 @@ class TaxController extends Controller
 
     public function create()
     {
-        return Inertia::render('Taxes/Create', [
+        return Inertia::render('taxes/Create', [
             'taxes' => Tax::orderBy('name')->get(),
         ]);
     }
@@ -43,7 +43,7 @@ class TaxController extends Controller
 
     public function edit(Tax $tax)
     {
-        return Inertia::render('Taxes/Edit', [
+        return Inertia::render('taxes/Edit', [
             'tax' => $tax
         ]);
     }

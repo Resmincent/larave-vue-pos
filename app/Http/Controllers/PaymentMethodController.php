@@ -12,14 +12,14 @@ class PaymentMethodController extends Controller
 
     public function index()
     {
-        return Inertia::render('PaymentMethods/Index', [
+        return Inertia::render('paymentMethods/Index', [
             'paymentMethods' => PaymentMethod::orderBy('name')->get(),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('PaymentMethods/Create');
+        return Inertia::render('paymentMethods/Create');
     }
 
     public function store(Request $request)
@@ -36,7 +36,7 @@ class PaymentMethodController extends Controller
 
     public function edit(PaymentMethod $paymentMethod)
     {
-        return Inertia::render('PaymentMethods/Edit', [
+        return Inertia::render('paymentMethods/Edit', [
             'paymentMethod' => $paymentMethod,
         ]);
     }

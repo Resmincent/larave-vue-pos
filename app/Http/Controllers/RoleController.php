@@ -17,7 +17,7 @@ class RoleController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Roles/Index', [
+        return Inertia::render('roles/Index', [
             'roles' => $roles,
             'filters' => ['query' => $query],
         ]);
@@ -25,7 +25,7 @@ class RoleController extends Controller
 
     public function create()
     {
-        return Inertia::render('Roles/Create', [
+        return Inertia::render('roles/Create', [
             'roles' => Role::orderBy('name')->get(['id', 'name']),
         ]);
     }

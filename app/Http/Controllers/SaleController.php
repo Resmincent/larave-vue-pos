@@ -27,7 +27,7 @@ class SaleController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Sales/Index', [
+        return Inertia::render('sales/Index', [
             'sales' => $sales,
             'filters' => ['query' => $query],
         ]);
@@ -35,7 +35,7 @@ class SaleController extends Controller
 
     public function create()
     {
-        return Inertia::render('Sales/Create', [
+        return Inertia::render('sales/Create', [
             'customers' => Customer::orderBy('name')->get(['id', 'name']),
             'products' => Product::orderBy('name')->get(['id', 'sku', 'sell_price', 'unit']),
             'methods' => PaymentMethod::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code'])
@@ -168,7 +168,7 @@ class SaleController extends Controller
             'items.product:id,name,sku,unit',
         ]);
         return Inertia(
-            'Sales/Show',
+            'sales/Show',
             [
                 'sale' => $sale
             ]

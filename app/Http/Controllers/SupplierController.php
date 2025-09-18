@@ -18,7 +18,7 @@ class SupplierController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Supplier/Index', [
+        return Inertia::render('supplier/Index', [
             'suppliers' => $suppliers,
             'filters' => ['query' => $query],
         ]);
@@ -26,7 +26,7 @@ class SupplierController extends Controller
 
     public function create()
     {
-        return Inertia::render('Supplier/Create');
+        return Inertia::render('supplier/Create');
     }
 
     public function store(Request $request)
@@ -44,7 +44,7 @@ class SupplierController extends Controller
 
     public function edit(Supply $supplier)
     {
-        return Inertia::render('Supplier/Edit', [
+        return Inertia::render('supplier/Edit', [
             'supplier' => $supplier,
         ]);
     }

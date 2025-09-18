@@ -16,7 +16,7 @@ class CustomerController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Customers/Index', [
+        return Inertia::render('customers/Index', [
             'customers' => $customers,
             'filters' => ['query' => $query],
         ]);
@@ -24,7 +24,7 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return Inertia::render('Customers/Create',);
+        return Inertia::render('customers/Create',);
     }
 
     public function store(Request $request)
@@ -40,7 +40,7 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer)
     {
-        return Inertia::render('Customers/Edit', [
+        return Inertia::render('customers/Edit', [
             'customer' => $customer,
         ]);
     }

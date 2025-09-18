@@ -18,7 +18,7 @@ class PermissionController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Permissions/Index', [
+        return Inertia::render('permissions/Index', [
             'permissions' => $permissions,
             'filters' => ['query' => $query],
         ]);
@@ -26,7 +26,7 @@ class PermissionController extends Controller
 
     public function create()
     {
-        return Inertia::render('Permissions/Create', [
+        return Inertia::render('permissions/Create', [
             'permissions' => Permission::orderBy('name')->get(['id', 'name']),
         ]);
     }
@@ -47,7 +47,7 @@ class PermissionController extends Controller
     public function edit(Permission $permission)
     {
         return Inertia::render(
-            'Permissions/Edit',
+            'permissions/Edit',
             [
                 'permission' => $permission
             ]

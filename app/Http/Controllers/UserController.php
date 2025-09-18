@@ -23,7 +23,7 @@ class UserController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'Users/Index',
+            'users/Index',
             [
                 'users' => $users,
                 'filters' => ['query' => $query]
@@ -33,7 +33,7 @@ class UserController extends Controller
 
     public function create()
     {
-        return Inertia::render('Users/Create', [
+        return Inertia::render('users/Create', [
             'roles' => Role::all(),
             'users' => User::orderBy('name')->get(['id', 'name'])
         ]);
@@ -57,7 +57,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return Inertia::render('Users/Edit', [
+        return Inertia::render('users/Edit', [
             'user' => $user,
             'roles' => Role::all(),
             'users' => User::where('id', '!=', $user->id)->orderBy('name')->get(['id', 'name'])

@@ -18,7 +18,7 @@ class PaymentController extends Controller
                 ->orWhereHas('purchase', fn($p) => $p->where('code', 'like', "%$q%")))
             ->orderByDesc('paid_at')->paginate(10)->withQueryString();
 
-        return Inertia::render('Payments/Index', [
+        return Inertia::render('payments/Index', [
             'filters' => ['q' => $q],
             'payments' => $payments
         ]);

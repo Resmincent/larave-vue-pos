@@ -25,7 +25,7 @@ class PurchaseController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia('Purchases/Index', [
+        return Inertia('purchases/Index', [
             'filters' => ['query' => $query],
             'purchases' => $purchases,
         ]);
@@ -33,7 +33,7 @@ class PurchaseController extends Controller
 
     public function create()
     {
-        return Inertia('Purchases/Create', [
+        return Inertia('purchases/Create', [
             'suppliers' => Supply::orderBy('name')->get(['id', 'name']),
             'products' => Product::orderBy('name')->get(['id', 'name', 'sku', 'cost_price', 'sell_price', 'unit']),
             'statuses' => [
@@ -135,7 +135,7 @@ class PurchaseController extends Controller
             'items.product:id,name,sku,unit',
         ]);
         return Inertia(
-            'Purchases/Show',
+            'purchases/Show',
             [
                 'purchase' => $purchase,
             ]

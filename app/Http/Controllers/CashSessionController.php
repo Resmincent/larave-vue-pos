@@ -20,7 +20,7 @@ class CashSessionController extends Controller
             ->paginate(10);
 
         return Inertia::render(
-            'CashSessions/Index',
+            'cashSessions/Index',
             [
                 'sessions' => $sessions
             ]
@@ -30,7 +30,7 @@ class CashSessionController extends Controller
     public function openFrom()
     {
         return Inertia::render(
-            'CashSessions/Open',
+            'cashSessions/Open',
             [
                 'last_open' => CashSession::where('status', CashSession::STATUS_OPEN)
                     ->latest('opened_at')

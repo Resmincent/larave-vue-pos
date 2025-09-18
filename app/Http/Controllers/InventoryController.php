@@ -23,7 +23,7 @@ class InventoryController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Invetories/Index', [
+        return Inertia::render('inventories/Index', [
             'inventories' => $inventories,
             'filters' => ['query' => $query],
         ]);
@@ -35,7 +35,7 @@ class InventoryController extends Controller
             ['product_id' => $product->id],
             ['qty' => 0]
         );
-        return Inertia::render('Inventories/Adjust', [
+        return Inertia::render('inventories/Adjust', [
             'inventory' => $inventory,
             'product' => $product->only(['id', 'name', 'sku', 'unit']),
         ]);

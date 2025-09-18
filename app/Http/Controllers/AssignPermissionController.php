@@ -12,9 +12,8 @@ class AssignPermissionController extends Controller
 {
     public function index()
     {
-        return Inertia::render('AssignPermission/Index', [
+        return Inertia::render('roles/Index', [
             'roles' => Role::all(),
-            'permissions' => Permission::all(),
         ]);
     }
 

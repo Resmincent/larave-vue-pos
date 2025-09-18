@@ -19,7 +19,7 @@ class CategoryController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'Categories/Index',
+            'categories/Index',
             [
                 'categories' => $categories,
                 'filters' => ['query' => $query],
@@ -29,7 +29,7 @@ class CategoryController extends Controller
 
     public function create()
     {
-        return Inertia::render('Categories/Create', [
+        return Inertia::render('categories/Create', [
             'categories' => Category::orderBy('name')->get(),
         ]);
     }
@@ -48,7 +48,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        return Inertia::render('Categories/Edit', [
+        return Inertia::render('categories/Edit', [
             'category' => $category,
             'parents' => Category::where('id', '!=', $category->id)->orderBy('name')->get(['id', 'name']),
         ]);

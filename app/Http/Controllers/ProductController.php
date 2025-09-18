@@ -23,7 +23,7 @@ class ProductController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'Products/Index',
+            'products/Index',
             [
                 'products' => $products,
                 'filters' => ['query' => $query],
@@ -36,7 +36,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Products/Create', [
+        return Inertia::render('products/Create', [
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'taxes' => Tax::orderBy('name')->get(['id', 'name', 'rate']),
             'units' => ['pcs', 'kg', 'litre', 'pack', 'box'],
@@ -68,7 +68,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        return Inertia::render('Products/Edit', [
+        return Inertia::render('products/Edit', [
             'product' => $product->load(['category', 'tax']),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'taxes' => Tax::orderBy('name')->get(['id', 'name', 'rate']),
