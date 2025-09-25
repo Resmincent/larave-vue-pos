@@ -18,7 +18,7 @@ class UserController extends Controller
 
         $query = $request->string('query');
         $users = User::with('roles')->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
-            ->orderBy('name')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -44,11 +44,20 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email',
-            'password' => Hash::make($request->input('password')),
             'is_admin' => 'sometimes|boolean',
         ]);
+        // Hash password secara manual
+        $data['password'] = Hash::make('pos123');
+
+        // Buat user
         $user = User::create($data);
-        $user->assignRole($request->role);
+
+        // Assign role
+        if ($request->filled('role')) {
+            $user->assignRole($request->role);
+        }
+
+        // Generate custom id
         $customId = $user->generateCustomId();
         $user->custom_id = $customId;
         $user->save();
@@ -84,7 +93,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();
+        $user->roles()->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
     }
 }

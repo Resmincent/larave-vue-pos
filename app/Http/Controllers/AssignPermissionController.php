@@ -25,7 +25,7 @@ class AssignPermissionController extends Controller
         for ($i = 0; $i < count($raw_role_permissions); $i++) {
             array_push($role_permissions, $raw_role_permissions[$i]['name']);
         }
-        return Inertia::render('AssignPermission/EditRolePermissions', [
+        return Inertia::render('assign/Edit', [
             'role' => $role,
             'permissions' => $permissions,
             'role_permissions' => $role_permissions,

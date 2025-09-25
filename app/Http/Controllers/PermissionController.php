@@ -14,7 +14,7 @@ class PermissionController extends Controller
     {
         $query = $request->string('query');
         $permissions = Permission::when($query, fn($w) => $w->where('name', 'like', "%$query%"))
-            ->orderBy('name')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import ModalDelete from '@/components/modules/Modal/ModalDelete.vue';
 import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import category from '@/routes/categories';
 import { type BreadcrumbItem } from '@/types';
 import { CategoryPagination } from '@/types/categories';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
 import moment from 'moment';
 import { computed, h, ref } from 'vue';
@@ -19,6 +20,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 const props = defineProps<{
     categories: CategoryPagination;
 }>();
+
+const modal = ref<InstanceType<typeof ModalDelete> | null>(null);
 
 // search state
 const search = ref('');
@@ -67,14 +70,13 @@ const columns = [
                     () => h('span', { class: 'text-md' }, 'Edit'),
                 ),
                 h(
-                    Link,
+                    'button',
                     {
-                        href: category.destroy(id).url,
-                        method: 'delete',
-                        as: 'button',
+                        type: 'button',
                         class: 'text-red-600 hover:text-red-800',
+                        onClick: () => deleteCategory(id),
                     },
-                    () => h('span', { class: 'text-md' }, 'Delete'),
+                    'Delete',
                 ),
             ]);
         },
@@ -105,6 +107,12 @@ const table = useVueTable({
     columns,
     getCoreRowModel: getCoreRowModel(),
 });
+
+function deleteCategory(id: number) {
+    modal.value?.open('Are you sure you want to delete this category?', () => {
+        router.delete(category.destroy(id).url);
+    });
+}
 </script>
 
 <template>
@@ -160,5 +168,6 @@ const table = useVueTable({
                 </div>
             </div>
         </div>
+        <ModalDelete ref="modal" />
     </AppLayout>
 </template>

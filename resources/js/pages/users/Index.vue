@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import ModalDelete from '@/components/modules/Modal/ModalDelete.vue';
 import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import user from '@/routes/users';
 import { type BreadcrumbItem } from '@/types';
 import { UserPagination } from '@/types/users';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
 import moment from 'moment';
 import { computed, h, ref } from 'vue';
@@ -22,9 +23,12 @@ const props = defineProps<{
 
 const search = ref('');
 
+const modal = ref<InstanceType<typeof ModalDelete> | null>(null);
+
 const items = computed(() =>
     props.users.data.map((item) => ({
         id: item.id,
+        custom_id: item.custom_id,
         name: item.name,
         email: item.email,
         roles: item.roles?.map((r) => r.name).join(', '),
@@ -45,6 +49,10 @@ const columns = [
     columnHelper.accessor('id', {
         header: 'ID',
         cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor('custom_id', {
+        header: 'Custom ID',
+        cell: (info) => info.getValue() || '-',
     }),
     columnHelper.accessor('name', {
         header: 'Name',
@@ -82,7 +90,7 @@ const columns = [
                     'a',
                     {
                         href: user.edit(id).url,
-                        class: 'text-cyan-600 hover:underline',
+                        class: 'text-cyan-400 hover:underline',
                     },
                     'Edit',
                 ),
@@ -94,6 +102,15 @@ const columns = [
                     },
                     'View',
                 ),
+                h(
+                    'button',
+                    {
+                        type: 'button',
+                        class: 'text-red-600 hover:text-red-800',
+                        onClick: () => deleteUser(id),
+                    },
+                    'Delete',
+                ),
             ]);
         },
     }),
@@ -104,6 +121,12 @@ const tableData = useVueTable({
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
 });
+
+function deleteUser(id: number) {
+    modal.value?.open('Are you sure you want to delete this user?', () => {
+        router.delete(user.destroy(id).url);
+    });
+}
 </script>
 
 <template>
@@ -154,5 +177,6 @@ const tableData = useVueTable({
                 </div>
             </div>
         </div>
+        <ModalDelete ref="modal" />
     </AppLayout>
 </template>

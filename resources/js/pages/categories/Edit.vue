@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import HeadingSmall from '@/components/HeadingSmall.vue';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import categories from '@/routes/categories';
 import { BreadcrumbItem } from '@/types';
 import { Category } from '@/types/categories';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps<{
     category: Category;
@@ -29,6 +38,16 @@ const form = useForm({
 
 function update() {
     form.put(categories.update(props.category.id).url);
+}
+
+const selectedCategory = ref<{ id: number | null; name: string }>({
+    id: form.parent_id ?? null,
+    name: props.parents.find((c) => c.id === form.parent_id)?.name || '-- None --',
+});
+
+function selectCategory(cat: { id: number | null; name: string }) {
+    selectedCategory.value = cat;
+    form.parent_id = cat.id;
 }
 </script>
 
@@ -66,16 +85,31 @@ function update() {
                     <!-- Parent -->
                     <div class="py-3">
                         <label class="mb-1 block text-sm font-medium text-gray-700">Parent Category</label>
-                        <select
-                            v-model="form.parent_id"
-                            class="w-full rounded-md border px-3 py-2 text-black focus:border-blue-500 focus:ring focus:ring-blue-200"
-                        >
-                            <option :value="null">-- None --</option>
-                            <option v-for="cat in props.parents" :key="cat.id" :value="cat.id" :disabled="cat.id === props.category.id">
-                                {{ cat.name }}
-                            </option>
-                        </select>
-                        <div v-if="form.errors.parent_id" class="mt-1 text-sm text-red-600">
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <button
+                                    type="button"
+                                    class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
+                                >
+                                    <span>{{ selectedCategory.name }}</span>
+                                    <ChevronDown class="h-4 w-4 opacity-70" />
+                                </button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent>
+                                <DropdownMenuItem @click="selectCategory({ id: null, name: '-- None --' })">
+                                    <DropdownMenuLabel>Select Category</DropdownMenuLabel>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem v-for="cat in props.parents" :key="cat.id" @click="selectCategory(cat)" class="w-full">
+                                    {{ cat.name }}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <div v-if="form.errors?.parent_id" class="mt-1 text-sm text-red-600">
                             {{ form.errors.parent_id }}
                         </div>
                     </div>

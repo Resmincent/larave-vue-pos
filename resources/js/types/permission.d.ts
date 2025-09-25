@@ -1,10 +1,10 @@
 import type { PaginationLink } from './pagination';
-export interface Role {
+export interface Permission {
     id: number;
     name: string;
 }
 
-export interface RolePagination {
+export interface PermissionPagination {
     current_page: number;
     data: Role[];
     from: number;

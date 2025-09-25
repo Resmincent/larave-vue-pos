@@ -86,19 +86,20 @@ function selectCategory(cat: { id: number | null; name: string }) {
                             <DropdownMenuTrigger as-child>
                                 <button
                                     type="button"
-                                    class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-black focus:border-blue-500 focus:ring focus:ring-blue-200"
+                                    class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
                                 >
                                     <span>{{ selectedCategory.name }}</span>
                                     <ChevronDown class="h-4 w-4 opacity-70" />
                                 </button>
                             </DropdownMenuTrigger>
 
-                            <DropdownMenuContent class="w-full">
-                                <DropdownMenuItem @click="selectCategory({ id: null, name: '-- None --' })"> -- None -- </DropdownMenuItem>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem @click="selectCategory({ id: null, name: '-- None --' })">
+                                    <DropdownMenuLabel>Select Category</DropdownMenuLabel>
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Select Category</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem v-for="cat in props.categories" :key="cat.id" @click="selectCategory(cat)">
+                                <DropdownMenuItem v-for="cat in props.categories" :key="cat.id" @click="selectCategory(cat)" class="w-full">
                                     {{ cat.name }}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

@@ -4,15 +4,15 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import user from '@/routes/users';
 import { BreadcrumbItem } from '@/types';
 import { Role } from '@/types/role';
-import { useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Categories',
+        title: 'Users',
         href: user.index().url,
     },
     {
-        title: 'Create Categories',
+        title: 'Create User',
         href: user.create().url,
     },
 ];
@@ -24,7 +24,7 @@ const props = defineProps<{
 const form = useForm({
     name: '',
     email: '',
-    role_id: null as number | null,
+    role: null as number | null,
 });
 
 function submit() {
@@ -46,7 +46,15 @@ function submit() {
 
                 <div class="h-5"></div>
 
+                <!-- Name & Email -->
                 <div class="w-full rounded-xl border-gray-200 bg-white px-6 py-4 shadow-md">
+                    <HeadingSmall title="User Information" description="Insert user information below" class="text-gray-800" />
+                    <span
+                        class="my-3 flex items-center justify-center rounded-full bg-cyan-100 px-2.5 py-2.5 text-xs font-medium text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300"
+                    >
+                        Default password for this user is pos123. Please change it after first login.
+                    </span>
+
                     <div class="py-3">
                         <label class="mb-1 block text-sm font-medium text-gray-700">Name</label>
                         <input
@@ -76,24 +84,24 @@ function submit() {
 
                 <div class="h-5"></div>
 
+                <!-- Role -->
                 <div class="w-full rounded-xl border-gray-200 bg-white px-6 py-4 shadow-md">
-                    <div class="py-3">
-                        <HeadingSmall title="Role" description="Assign a role to the user" class="text-gray-800" />
-                    </div>
+                    <HeadingSmall title="Role" description="Assign a role to the user" class="text-gray-800" />
                     <div class="mt-3 space-y-2">
                         <label v-for="role in props.roles" :key="role.id" class="flex cursor-pointer items-center gap-2">
-                            <input type="radio" class="text-blue-600 focus:ring focus:ring-blue-200" v-model="form.role_id" :value="role.id" />
+                            <input type="radio" class="text-blue-600 focus:ring focus:ring-blue-200" v-model="form.role" :value="role.id" />
                             <span class="text-gray-700">{{ role.name }}</span>
                         </label>
                     </div>
 
-                    <div v-if="form.errors.role_id" class="mt-2 text-sm text-red-600">
-                        {{ form.errors.role_id }}
+                    <div v-if="form.errors.role" class="mt-2 text-sm text-red-600">
+                        {{ form.errors.role }}
                     </div>
                 </div>
 
                 <div class="h-5"></div>
 
+                <!-- Actions -->
                 <div class="flex justify-end gap-2">
                     <button
                         type="button"
