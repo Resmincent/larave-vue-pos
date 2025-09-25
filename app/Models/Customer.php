@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Customer extends Model
 {
 
-    protected $fillable = ['name', 'phone'];
+    protected $fillable = ['user_id', 'address', 'phone'];
 
     public function sales()
     {
         return $this->hasMany(Sale::class, 'customer_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

@@ -13,8 +13,7 @@ class Supply extends Model
     protected $table = 'suppliers';
 
     protected $fillable = [
-        'name',
-        'email',
+        'user_id',
         'phone',
         'address',
         'is_active'
@@ -27,5 +26,10 @@ class Supply extends Model
     public function purchases()
     {
         return $this->hasMany(Purchase::class, 'supplier_id' . 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

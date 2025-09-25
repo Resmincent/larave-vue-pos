@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -11,8 +13,9 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $query = $request->string('query');
-        $customers = Customer::when($query, fn($w) => $w->where('name', 'like', "%$query%"))
-            ->orderBy('name')
+        $customers = Customer::with('user')
+            ->when($query, fn($w) => $w->whereHas('user', fn($q) => $q->where('name', 'like', "%$query%")))
+            ->orderBy(Customer::select('name')->join('users', 'users.id', '=', 'customers.user_id'))
             ->paginate(10)
             ->withQueryString();
 
@@ -24,22 +27,42 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return Inertia::render('customers/Create',);
+        return Inertia::render('customers/Create');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+            'address' => 'required|string',
             'phone' => 'nullable|string|max:15|unique:customers,phone',
         ]);
 
-        Customer::create($data);
+        // 1. Buat user
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        // 2. Assign role Customer
+        $user->assignRole('Customer');
+
+        // 3. Buat profile customer
+        Customer::create([
+            'user_id' => $user->id,
+            'address' => $data['address'],
+            'phone' => $data['phone'],
+        ]);
+
         return redirect()->route('customers.index')->with('success', 'Customer created successfully');
     }
 
     public function edit(Customer $customer)
     {
+        $customer->load('user');
         return Inertia::render('customers/Edit', [
             'customer' => $customer,
         ]);
@@ -49,16 +72,29 @@ class CustomerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:100',
-            'phone' => 'nullable|string|max:15|unique:customers,phone',
+            'email' => 'required|email|unique:users,email,' . $customer->user_id,
+            'address' => 'required|string',
+            'phone' => 'nullable|string|max:15|unique:customers,phone,' . $customer->id,
         ]);
 
-        $customer->update($data);
+        // Update user
+        $customer->user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        // Update customer profile
+        $customer->update([
+            'address' => $data['address'],
+            'phone' => $data['phone'],
+        ]);
+
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully');
     }
 
     public function destroy(Customer $customer)
     {
-        $customer->delete();
+        $customer->user()->delete();
         return redirect()->back()->with('success', 'Customer deleted successfully');
     }
 }

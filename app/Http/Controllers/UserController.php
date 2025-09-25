@@ -17,7 +17,7 @@ class UserController extends Controller
     {
 
         $query = $request->string('query');
-        $users = User::when($query, fn($w) => $w->where('name', 'like', "%$query%"))
+        $users = User::with('roles')->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -34,7 +34,7 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('users/Create', [
-            'roles' => Role::all(),
+            'roles' => Role::all(['id', 'name']),
             'users' => User::orderBy('name')->get(['id', 'name'])
         ]);
     }

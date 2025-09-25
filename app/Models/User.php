@@ -65,6 +65,16 @@ class User extends Authenticatable
         return $this->hasMany(CashSession::class, 'user_id', 'id');
     }
 
+    public function customers()
+    {
+        return $this->hasMany(Customer::class, 'user_id', 'id');
+    }
+
+    public function suppliers()
+    {
+        return $this->hasMany(Supply::class, 'user_id', 'id');
+    }
+
     public function generateCustomId()
     {
 
