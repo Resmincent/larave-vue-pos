@@ -7,7 +7,7 @@ import { type BreadcrumbItem } from '@/types';
 import { PermissionPagination } from '@/types/permission';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
-import { computed, h, ref } from 'vue';
+import { computed, h, ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,9 +18,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps<{
     permissions: PermissionPagination;
+    filters: { query?: string };
 }>();
 
-const search = ref('');
+const search = ref(props.filters.query || '');
 
 const columnHelper = createColumnHelper<any>();
 
@@ -76,10 +77,12 @@ const items = computed(() =>
     })),
 );
 
-const filteredItems = computed(() => items.value.filter((item) => item.name.toLowerCase().includes(search.value.toLowerCase())));
+watch(search, (value) => {
+    router.get(permission.index().url, { query: value }, { preserveState: true, replace: true });
+});
 
 const tableData = useVueTable({
-    data: filteredItems,
+    data: items,
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
 });

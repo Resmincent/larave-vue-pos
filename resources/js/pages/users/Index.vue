@@ -8,7 +8,7 @@ import { UserPagination } from '@/types/users';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
 import moment from 'moment';
-import { computed, h, ref } from 'vue';
+import { computed, h, ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,11 +19,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps<{
     users: UserPagination;
+    filters: { query?: string };
 }>();
 
-const search = ref('');
+const search = ref(props.filters.query || '');
 
 const modal = ref<InstanceType<typeof ModalDelete> | null>(null);
+
+watch(search, (value) => {
+    router.get(user.index().url, { query: value }, { preserveState: true, replace: true });
+});
 
 const items = computed(() =>
     props.users.data.map((item) => ({
@@ -35,12 +40,6 @@ const items = computed(() =>
         created_at: item.created_at || '-',
         updated_at: item.updated_at || '-',
     })),
-);
-
-const filteredItems = computed(() =>
-    items.value.filter(
-        (item) => item.name.toLowerCase().includes(search.value.toLowerCase()) || item.email.toLowerCase().includes(search.value.toLowerCase()),
-    ),
 );
 
 const columnHelper = createColumnHelper<any>();
@@ -117,7 +116,7 @@ const columns = [
 ];
 
 const tableData = useVueTable({
-    data: filteredItems,
+    data: items,
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
 });

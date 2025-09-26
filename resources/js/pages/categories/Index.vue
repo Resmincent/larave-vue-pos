@@ -8,7 +8,7 @@ import { CategoryPagination } from '@/types/categories';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
 import moment from 'moment';
-import { computed, h, ref } from 'vue';
+import { computed, h, ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,12 +19,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps<{
     categories: CategoryPagination;
+    filters: { query?: string };
 }>();
 
 const modal = ref<InstanceType<typeof ModalDelete> | null>(null);
 
 // search state
-const search = ref('');
+const search = ref(props.filters.query || '');
 
 // column helper
 const columnHelper = createColumnHelper<any>();
@@ -95,15 +96,13 @@ const items = computed(() =>
 );
 
 // filter pencarian
-const filteredItems = computed(() =>
-    items.value.filter(
-        (i) => i.name.toLowerCase().includes(search.value.toLowerCase()) || i.parent_name.toLowerCase().includes(search.value.toLowerCase()),
-    ),
-);
+watch(search, (value) => {
+    router.get(category.index().url, { query: value }, { preserveState: true, replace: true });
+});
 
 // build table instance
 const table = useVueTable({
-    data: filteredItems,
+    data: items,
     columns,
     getCoreRowModel: getCoreRowModel(),
 });
