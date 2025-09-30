@@ -18,7 +18,7 @@ return new class extends Migration
             $table->bigInteger('qty');
             $table->decimal('price', 15, 2);
             $table->decimal('discount', 15, 2)->default(0);
-            $table->decimal('tax', 15, 2)->default(0);
+            $table->foreignId('tax_id')->constrained('tax')->cascadeOnDelete();
             $table->decimal('line_total', 15, 2);
             $table->timestamps();
         });

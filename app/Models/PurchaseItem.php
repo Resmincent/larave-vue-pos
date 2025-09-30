@@ -14,7 +14,7 @@ class PurchaseItem extends Model
         'qty',
         'cost_price',
         'discount',
-        'tax',
+        'tax_id',
         'line_total',
     ];
 

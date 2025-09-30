@@ -14,19 +14,18 @@ class CustomerController extends Controller
     {
         $query = $request->string('query');
 
-        $customers = Customer::with(['user.roles'])
-            ->whereHas('user.roles', fn($r) => $r->where('name', 'Customer')) // hanya user dengan role Customer
+        $customers = Customer::with('user.roles')
+            ->whereHas('user.roles', fn($q) => $q->where('name', 'Customer'))
             ->when(
                 $query,
-                fn($w) =>
-                $w->whereHas('user', fn($q) => $q->where('name', 'like', "%$query%"))
+                fn($q) =>
+                $q->whereHas('user', fn($u) => $u->where('name', 'like', "%$query%"))
             )
-            ->orderBy(
-                Customer::select('name')
-                    ->join('users', 'users.id', '=', 'customers.user_id')
-            )
-            ->paginate(10)
-            ->withQueryString();
+            ->join('users', 'users.id', '=', 'customers.user_id') // ✅ fix sort
+            ->select('customers.*', 'users.name as user_name')
+            ->orderBy('users.name')
+            ->paginate(10);
+
 
         return Inertia::render('customers/Index', [
             'customers' => $customers,

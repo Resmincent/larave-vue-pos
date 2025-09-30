@@ -12,7 +12,7 @@ class SaleItem extends Model
         'qty',
         'price',
         'discount',
-        'tax',
+        'tax_id',
         'line_total',
     ];
 
@@ -24,5 +24,10 @@ class SaleItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
+
+    public function taxs()
+    {
+        return $this->belongsTo(Tax::class, 'tax_id', 'id');
     }
 }

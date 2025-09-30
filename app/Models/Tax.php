@@ -15,4 +15,9 @@ class Tax extends Model
     {
         return $this->hasMany(Product::class, 'tax_id', 'id');
     }
+
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class, 'tax_id', 'id');
+    }
 }
