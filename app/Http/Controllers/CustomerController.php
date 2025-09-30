@@ -13,17 +13,27 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $query = $request->string('query');
-        $customers = Customer::with('user')
-            ->when($query, fn($w) => $w->whereHas('user', fn($q) => $q->where('name', 'like', "%$query%")))
-            ->orderBy(Customer::select('name')->join('users', 'users.id', '=', 'customers.user_id'))
+
+        $customers = Customer::with(['user.roles'])
+            ->whereHas('user.roles', fn($r) => $r->where('name', 'Customer')) // hanya user dengan role Customer
+            ->when(
+                $query,
+                fn($w) =>
+                $w->whereHas('user', fn($q) => $q->where('name', 'like', "%$query%"))
+            )
+            ->orderBy(
+                Customer::select('name')
+                    ->join('users', 'users.id', '=', 'customers.user_id')
+            )
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('customers/Index', [
             'customers' => $customers,
-            'filters' => ['query' => $query],
+            'filters'   => ['query' => $query],
         ]);
     }
+
 
     public function create()
     {

@@ -94,14 +94,6 @@ const columns = [
                     'Edit',
                 ),
                 h(
-                    'a',
-                    {
-                        href: user.show(id).url,
-                        class: 'text-cyan-600 hover:underline',
-                    },
-                    'View',
-                ),
-                h(
                     'button',
                     {
                         type: 'button',

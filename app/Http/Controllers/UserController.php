@@ -69,7 +69,6 @@ class UserController extends Controller
         return Inertia::render('users/Edit', [
             'user' => $user,
             'roles' => Role::all(),
-            'users' => User::where('id', '!=', $user->id)->orderBy('name')->get(['id', 'name'])
         ]);
     }
 
