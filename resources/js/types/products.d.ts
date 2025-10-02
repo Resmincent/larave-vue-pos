@@ -16,8 +16,8 @@ export interface Product {
     updated_at: string;
     deleted_at?: string;
 
-    category?: Category | null;
-    tax?: Tax | null;
+    categories?: Category | null;
+    taxes?: Tax | null;
     stocks?: StockMovement[];
     saleitems?: SaleItem[];
     purchaseItems?: PurchaseItem[];

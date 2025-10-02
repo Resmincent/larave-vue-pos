@@ -2,6 +2,7 @@ import { PaginationLink } from './pagination';
 import { Product } from './products';
 
 export interface Tax {
+    id: number;
     name: string;
     rate: number;
     products: Product[];

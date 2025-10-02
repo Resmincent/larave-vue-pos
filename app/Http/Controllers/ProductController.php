@@ -37,8 +37,8 @@ class ProductController extends Controller
     public function create()
     {
         return Inertia::render('products/Create', [
-            'categories' => Category::orderBy('name')->get(['id', 'name']),
-            'taxes' => Tax::orderBy('name')->get(['id', 'name', 'rate']),
+            'categories' => Category::all(['id', 'name']),
+            'taxes' => Tax::all(['id', 'name', 'rate']),
             'units' => ['pcs', 'kg', 'litre', 'pack', 'box'],
         ]);
     }
