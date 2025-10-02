@@ -49,6 +49,13 @@ const columns = [
     columnHelper.accessor('sku', {
         header: 'SKU',
     }),
+    columnHelper.accessor('unit', {
+        header: 'Unit',
+    }),
+    columnHelper.accessor('isActive', {
+        header: 'Is Active',
+        cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+    }),
     columnHelper.accessor('name', {
         header: 'Name',
     }),
@@ -57,6 +64,14 @@ const columns = [
     }),
     columnHelper.accessor('taxId', {
         header: 'Tax',
+    }),
+    columnHelper.accessor('sellPrice', {
+        header: 'Sell Price',
+        cell: (info) => `Rp${Number(info.getValue()).toLocaleString('id-ID')}`,
+    }),
+    columnHelper.accessor('costPrice', {
+        header: 'Cost Price',
+        cell: (info) => `Rp${Number(info.getValue()).toLocaleString('id-ID')}`,
     }),
 ];
 
@@ -75,12 +90,16 @@ const tableData = useVueTable({
             <div class="space-y-4 p-6">
                 <div class="flex items-center justify-between">
                     <input
+                        v-model="search"
                         type="text"
                         placeholder="Search product"
                         class="h-10 w-64 rounded-md border px-3 py-2 text-black focus:ring focus:ring-cyan-200 focus:outline-none"
                     />
 
-                    <Link class="inline-flex items-center gap-2 rounded bg-cyan-800 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700">
+                    <Link
+                        :href="product.create().url"
+                        class="inline-flex items-center gap-2 rounded bg-cyan-800 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+                    >
                         Add Product
                     </Link>
                 </div>
