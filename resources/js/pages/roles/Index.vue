@@ -90,7 +90,7 @@ const tableData = useVueTable({
     <Head title="Roles" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="rounded-lg bg-white shadow-md">
+        <div class="shadow-m rounded-lg bg-white p-5">
             <div class="overflow-x-auto rounded-lg border">
                 <table class="min-w-full border-collapse bg-white">
                     <thead class="bg-gray-100">

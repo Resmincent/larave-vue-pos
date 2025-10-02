@@ -8,6 +8,8 @@ defineProps<{
 }>();
 
 const page = usePage();
+
+// 🔍 Debug items yang diterima
 </script>
 
 <template>

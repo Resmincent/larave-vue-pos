@@ -18,7 +18,7 @@ class ProductController extends Controller
         $query = $request->string('query');
         $products = Product::with(['category', 'tax'])
             ->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
-            ->orderBy('name')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

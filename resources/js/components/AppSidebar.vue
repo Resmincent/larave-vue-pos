@@ -4,13 +4,17 @@ import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { sidebarMenus } from '@/components/ui/sidebar/customSidebar';
+import { useRole } from '@/composables/useRoles';
 import { dashboard } from '@/routes';
 import { Link, usePage } from '@inertiajs/vue3';
 import AppLogo from './AppLogo.vue';
 
 const { props } = usePage();
+
 const user = props.auth?.user;
-const role = user?.roles?.[0]?.name || 'Admin';
+const role = useRole(user);
+
+// console.log('Role Detected: ', role);
 
 const menus = sidebarMenus[role] || { main: [], footer: [] };
 </script>

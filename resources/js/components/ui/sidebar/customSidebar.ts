@@ -34,7 +34,7 @@ import taxes from "@/routes/taxes"
 import paymentMethods from "@/routes/payment-methods"
 
 export const sidebarMenus: Record<string, { main: NavItem[]; footer: NavItem[] }> = {
-  Admin: {
+  admin: {
     main: [
       { title: "Dashboard", href: dashboard(), icon: LayoutGrid },
       { title: "Products", href: products.index(), icon: Box },
@@ -62,7 +62,7 @@ export const sidebarMenus: Record<string, { main: NavItem[]; footer: NavItem[] }
     ],
   },
 
-  Cashier: {
+  cashier: {
     main: [
       { title: "Dashboard", href: dashboard(), icon: LayoutGrid },
       { title: "Sales", href: sale.index(), icon: WalletCards },
@@ -74,7 +74,7 @@ export const sidebarMenus: Record<string, { main: NavItem[]; footer: NavItem[] }
     ],
   },
 
-  Inventory: {
+  inventory: {
     main: [
       { title: "Dashboard", href: dashboard(), icon: LayoutGrid },
       { title: "Products", href: products.index(), icon: Box },
@@ -86,7 +86,7 @@ export const sidebarMenus: Record<string, { main: NavItem[]; footer: NavItem[] }
     footer: [],
   },
 
-  Customer: {
+  customer: {
     main: [
       { title: "Dashboard", href: dashboard(), icon: LayoutGrid },
       { title: "My Sales", href: sale.index(), icon: WalletCards },
@@ -94,7 +94,7 @@ export const sidebarMenus: Record<string, { main: NavItem[]; footer: NavItem[] }
     footer: [],
   },
 
-  Supplier: {
+  supplier: {
     main: [
       { title: "Dashboard", href: dashboard(), icon: LayoutGrid },
       { title: "Purchase Orders", href: purchases.index(), icon: Receipt },

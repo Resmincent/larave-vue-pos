@@ -32,7 +32,7 @@ const items = computed(() =>
         sku: item.sku,
         name: item.name,
         category: item.category?.name,
-        taxId: item.tax?.rate,
+        taxId: item.tax?.name,
         sellPrice: item.sell_price,
         costPrice: item.cost_price,
         unit: item.unit,
@@ -64,13 +64,14 @@ const columns = [
     }),
     columnHelper.accessor('taxId', {
         header: 'Tax',
-    }),
-    columnHelper.accessor('sellPrice', {
-        header: 'Sell Price',
-        cell: (info) => `Rp${Number(info.getValue()).toLocaleString('id-ID')}`,
+        cell: (info) => info.getValue() || '-',
     }),
     columnHelper.accessor('costPrice', {
         header: 'Cost Price',
+        cell: (info) => `Rp${Number(info.getValue()).toLocaleString('id-ID')}`,
+    }),
+    columnHelper.accessor('sellPrice', {
+        header: 'Sell Price',
         cell: (info) => `Rp${Number(info.getValue()).toLocaleString('id-ID')}`,
     }),
 ];
