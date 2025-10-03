@@ -156,6 +156,9 @@ function deleteCategory(id: number) {
                         </thead>
 
                         <tbody>
+                            <tr v-if="table.getRowModel().rows.length === 0">
+                                <td colspan="6" class="border-b px-4 py-8 text-center text-sm text-gray-500">No category data found</td>
+                            </tr>
                             <tr v-for="row in table.getRowModel().rows" :key="row.id" class="hover:bg-gray-50">
                                 <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="border-b px-4 py-2 text-sm text-gray-600">
                                     <component :is="FlexRender" :render="cell.column.columnDef.cell" :props="cell.getContext()" />

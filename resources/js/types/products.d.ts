@@ -2,32 +2,44 @@ import { Category } from './categories';
 import { PaginationLink } from './pagination';
 import { Tax } from './tax';
 
+export interface Inventory {
+    id: number;
+    product_id: number;
+    qty: number;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Product {
     id: number;
     sku: string;
     name: string;
-    category_id: string | null;
-    tax_id: string | null;
+    category_id: number | null;
+    tax_id: number | null;
     sell_price: number;
     cost_price: number;
-    unit: number;
+    unit: string; // << ganti jadi string
     is_active: boolean;
     created_at: string;
     updated_at: string;
-    deleted_at?: string;
+    deleted_at?: string | null;
 
+    // relations
     category?: Category | null;
     tax?: Tax | null;
+    inventory?: Inventory | null; // << tambah relasi inventory
     stocks?: StockMovement[];
-    saleitems?: SaleItem[];
+    saleItems?: SaleItem[];
     purchaseItems?: PurchaseItem[];
 }
+
+export type StockMovementType = 'SALE' | 'PURCHASE' | 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT' | 'RETURN_SALE' | 'RETURN_PURCHASE';
 
 export interface StockMovement {
     id: number;
     product_id: number;
     qty_change: number;
-    type: 'SALE' | 'PURCHASE' | 'ADJUSTMENT' | 'RETURN_SALE' | 'RETURN_PURCHASE';
+    type: StockMovementType;
     source_type?: string | null;
     source_id?: number | null;
     note?: string | null;
@@ -41,7 +53,7 @@ export interface SaleItem {
     qty: number;
     price: number;
     discount: number;
-    tax_id: number;
+    tax_id: number | null;
     line_total: number;
 }
 

@@ -9,6 +9,9 @@ class StockMovement extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
+
     protected $fillable = [
         'product_id',
         'qty_change',

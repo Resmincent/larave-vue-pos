@@ -15,16 +15,20 @@ class InventoryController extends Controller
     public function index(Request $request)
     {
         $query = $request->string('query');
-        $inventories = Inventory::with('product: id, name, sku, unit')
-            ->when($query, fn($w) =>
-            $w->whereHas('product', fn($p) =>
-            $p->where('name', 'like', "%$query%")->orWhere('sku', 'like', "%$query%")))
-            ->orderBy('id', 'desc')
+
+        $products = Product::with(['inventory:id,product_id,qty'])
+            ->when(
+                $query,
+                fn($q) =>
+                $q->where('name', 'like', "%{$query}%")
+                    ->orWhere('sku', 'like', "%{$query}%")
+            )
+            ->orderBy('id',)
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('inventories/Index', [
-            'inventories' => $inventories,
+            'inventories' => $products,
             'filters' => ['query' => $query],
         ]);
     }
@@ -35,7 +39,8 @@ class InventoryController extends Controller
             ['product_id' => $product->id],
             ['qty' => 0]
         );
-        return Inertia::render('inventories/Adjust', [
+
+        return Inertia::render('inventories/Index', [
             'inventory' => $inventory,
             'product' => $product->only(['id', 'name', 'sku', 'unit']),
         ]);
@@ -49,24 +54,40 @@ class InventoryController extends Controller
         ]);
 
         DB::transaction(function () use ($product, $data) {
-            $inv = Inventory::lockForUpdate()->firstOrCreate(
-                ['product_id' => $product->id],
-                ['qty' => 0],
-            );
-            $inv->qty += $data['qty_change'];
+            // Lock record supaya tidak race condition
+            $inv = Inventory::where('product_id', $product->id)->lockForUpdate()->first();
+
+            if (!$inv) {
+                $inv = Inventory::create([
+                    'product_id' => $product->id,
+                    'qty' => 0,
+                ]);
+            }
+
+            // Validasi stok tidak boleh minus
+            $newQty = $inv->qty + $data['qty_change'];
+            if ($newQty < 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qty_change' => 'Stock tidak boleh kurang dari 0',
+                ]);
+            }
+
+            // Update stok
+            $inv->qty = $newQty;
             $inv->save();
 
+            // Catat pergerakan stok
             StockMovement::create([
-                'product_id' => $product->id,
-                'qty_change' => $data['qty_change'],
-                'type' => $data['qty_change'] > 0 ? 'ADJUSMENT_IN' : 'ADJUSMENT_OUT',
+                'product_id'  => $product->id,
+                'qty_change'  => $data['qty_change'],
+                'type'        => 'ADJUSTMENT',
                 'source_code' => 'Manual',
-                'source_id' => null,
-                'note' => $data['note'] ?? null,
-                'created_at' => now(),
+                'source_id'   => null,
+                'note'        => $data['note'] ?? null,
             ]);
         });
 
-        return redirect()->route('inventories.index')->with('success', 'Inventory adjusted successfully');
+        return redirect()->route('inventories.index')
+            ->with('success', 'Inventory adjusted successfully');
     }
 }
