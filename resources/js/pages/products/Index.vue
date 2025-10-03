@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ModalDelete from '@/components/modules/Modal/ModalDelete.vue';
 import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import product from '@/routes/products';
@@ -6,7 +7,7 @@ import { type BreadcrumbItem } from '@/types';
 import { ProductPagination } from '@/types/products';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
-import { computed, ref, watch } from 'vue';
+import { computed, h, ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,8 +32,8 @@ const items = computed(() =>
         id: item.id,
         sku: item.sku,
         name: item.name,
-        category: item.category?.name,
-        taxId: item.tax?.name,
+        category: item.category ? item.category.name : null,
+        taxId: item.tax ? item.tax.name : null,
         sellPrice: item.sell_price,
         costPrice: item.cost_price,
         unit: item.unit,
@@ -74,6 +75,32 @@ const columns = [
         header: 'Sell Price',
         cell: (info) => `Rp${Number(info.getValue()).toLocaleString('id-ID')}`,
     }),
+    columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        cell: (info) => {
+            const id = info.row.original.id;
+            return h('div', { class: 'flex gap-4' }, [
+                h(
+                    'a',
+                    {
+                        href: product.edit(id).url,
+                        class: 'text-cyan-400 hover:underline',
+                    },
+                    'Edit',
+                ),
+                h(
+                    'button',
+                    {
+                        type: 'button',
+                        class: 'text-red-600 hover:text-red-800',
+                        onClick: () => deleteProduct(id),
+                    },
+                    'Delete',
+                ),
+            ]);
+        },
+    }),
 ];
 
 const tableData = useVueTable({
@@ -81,6 +108,14 @@ const tableData = useVueTable({
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
 });
+
+const modal = ref<InstanceType<typeof ModalDelete> | null>(null);
+
+function deleteProduct(id: number) {
+    modal.value?.open('Are you sure you want to delete this product', () => {
+        router.delete(product.destroy(id).url);
+    });
+}
 </script>
 
 <template>
@@ -131,5 +166,6 @@ const tableData = useVueTable({
                 </div>
             </div>
         </div>
+        <ModalDelete ref="modal" />
     </AppLayout>
 </template>

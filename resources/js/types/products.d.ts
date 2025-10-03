@@ -6,8 +6,8 @@ export interface Product {
     id: number;
     sku: string;
     name: string;
-    category_id: number | null;
-    tax_id: number | null;
+    category_id: string | null;
+    tax_id: string | null;
     sell_price: number;
     cost_price: number;
     unit: number;
@@ -16,8 +16,8 @@ export interface Product {
     updated_at: string;
     deleted_at?: string;
 
-    categories?: Category | null;
-    taxes?: Tax | null;
+    category?: Category | null;
+    tax?: Tax | null;
     stocks?: StockMovement[];
     saleitems?: SaleItem[];
     purchaseItems?: PurchaseItem[];

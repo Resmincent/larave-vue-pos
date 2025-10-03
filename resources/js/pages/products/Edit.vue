@@ -4,8 +4,16 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import products from '@/routes/products';
 import { BreadcrumbItem } from '@/types';
 import { Category } from '@/types/categories';
+import { Product } from '@/types/products';
 import { Tax } from '@/types/tax';
 import { Head, useForm } from '@inertiajs/vue3';
+
+const props = defineProps<{
+    taxes: Tax[];
+    categories: Category[];
+    units: string[];
+    product: Product;
+}>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,48 +21,42 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: products.index().url,
     },
     {
-        title: 'Create Product',
-        href: products.create().url,
+        title: 'Edit Product',
+        href: products.edit(props.product.id).url,
     },
 ];
 
-const props = defineProps<{
-    taxes: Tax[];
-    categories: Category[];
-    units: string[];
-}>();
-
 const form = useForm({
-    sku: '',
-    name: '',
-    category_id: null as number | null,
-    tax_id: null as number | null,
-    sell_price: '',
-    cost_price: '',
-    unit: '',
-    is_active: false,
+    sku: props.product.sku,
+    name: props.product.name,
+    category_id: props.product.category_id,
+    tax_id: props.product.tax_id,
+    sell_price: props.product.sell_price,
+    cost_price: props.product.cost_price,
+    unit: props.product.unit,
+    is_active: Boolean(props.product.is_active),
 });
 
-function submit() {
-    form.post(products.store().url);
+function updateProduct() {
+    form.put(products.update(props.product.id).url);
 }
 </script>
 <template>
-    <Head title="Create Product" />
+    <Head title="Edit Product" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="mx-auto h-full w-2/3 items-center justify-center p-5">
-            <form @submit.prevent="submit">
+            <form @submit.prevent="updateProduct">
                 <div class="w-full rounded-xl border-gray-200 bg-white shadow-md">
                     <div class="border-b px-6 py-4">
-                        <HeadingSmall title="Create Product" description="Create a new product" class="text-gray-800" />
+                        <HeadingSmall title="Edit Product" description="Edit a product" class="text-gray-800" />
                     </div>
                 </div>
 
                 <div class="h-5"></div>
 
-                <div class="w-full rounded-xl border-gray-200 bg-white px-6 py-4 shadow-md">
-                    <HeadingSmall title="Product Information" description="Inser product infformation below" class="text-gray-800" />
+                <div class="w-full rounded-xl border-gray-200 bg-white px-6 py-4 shadow-lg">
+                    <HeadingSmall title="Product Information" description="Update product infformation below" class="text-gray-800" />
 
                     <div class="py-3">
                         <label class="mb-1 block text-sm font-medium text-gray-700">Name</label>
@@ -83,8 +85,12 @@ function submit() {
                             </div>
                         </div>
                         <div class="mb-3 flex basis-64 items-end justify-center">
-                            <label class="flex items-center gap-4">
-                                <input type="checkbox" v-model="form.is_active" class="h-6 w-6 text-blue-600 focus:ring focus:ring-blue-200" />
+                            <label class="flex cursor-pointer items-center gap-4">
+                                <input
+                                    type="checkbox"
+                                    v-model="form.is_active"
+                                    class="h-6 w-6 cursor-pointer rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                />
                                 <span class="text-gray-700">Active</span>
                             </label>
                         </div>
