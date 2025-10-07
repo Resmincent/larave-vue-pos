@@ -12,10 +12,16 @@ class PaymentMethodController extends Controller
 
     public function index()
     {
+        $paymentMethods = PaymentMethod::select('id', 'code', 'name', 'is_active')
+            ->orderBy('id')
+            ->paginate(10)
+            ->withQueryString();
+
         return Inertia::render('paymentMethods/Index', [
-            'paymentMethods' => PaymentMethod::orderBy('name')->get(),
+            'paymentMethods' => $paymentMethods,
         ]);
     }
+
 
     public function create()
     {

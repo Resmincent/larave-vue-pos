@@ -52,6 +52,17 @@ export interface PaymentMethod {
     is_active: boolean;
 }
 
+export interface PaymentMethodPagination {
+    current_page: number;
+    data: PaymentMethod[];
+    from: number | null;
+    last_page: number;
+    per_page: number;
+    to: number;
+    total: number;
+    links: PaginationLink[];
+}
+
 export interface SalePagination {
     current_page: number;
     data: Sale[];
