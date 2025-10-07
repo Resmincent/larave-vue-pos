@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('grand_total', 15, 2)->default(0);
             $table->decimal('paid_total', 15, 2)->default(0);
             $table->decimal('change_due', 15, 2)->default(0);
-            $table->timestamp('sold_at')->useCurrent();
+            $table->timestamp('sold_at')->nullable();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('note')->nullable();
             $table->softDeletes();

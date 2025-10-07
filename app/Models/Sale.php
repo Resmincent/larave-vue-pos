@@ -7,6 +7,7 @@ use App\Models\SaleItem;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Sale extends Model
 {
@@ -53,5 +54,26 @@ class Sale extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class, 'sale_id', 'id');
+    }
+
+
+    public static function generateCode(?Carbon $now = null): string
+    {
+        $now ??= Carbon::now();
+        $year   = $now->format('Y');
+        $prefix = "S-{$year}-";
+
+        // cari kode terakhir tahun ini
+        $lastCode = static::where('code', 'like', $prefix . '%')
+            ->orderByDesc('code')
+            ->value('code');
+
+        $seq = 1;
+        if ($lastCode) {
+            $lastSeq = (int) substr($lastCode, -4);
+            $seq = $lastSeq + 1;
+        }
+
+        return $prefix . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
     }
 }

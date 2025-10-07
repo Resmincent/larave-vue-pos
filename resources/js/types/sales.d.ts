@@ -1,38 +1,64 @@
+// types/sales.ts
 import { User } from '.';
 import { Customer } from './customers';
 import { PaginationLink } from './pagination';
 import { SaleItem } from './products';
 
+export type StatusType = 'OPEN' | 'PAID' | 'VOID';
+
 export interface Sale {
     id: number;
-    customer_id: number;
-    status: string;
-    subtotal: StatusType;
+    code: string;
+    customer_id: number | null;
+    user_id: number;
+    status: StatusType;
+
+    subtotal: string;
     discount_total: string;
     tax_total: string;
     grand_total: string;
     paid_total: string;
     change_due: string;
-    sold_at: string;
+
+    sold_at: string | null;
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
     note?: string | null;
 
-    customer: Customer | null;
-    user: User | null;
+    customer?: Customer | null;
+    user?: User | null;
     saleItems: SaleItem[];
+    payments: Payment[];
 }
 
-export type StatusType = 'OPEN' | 'PAID' | 'VOID';
+export interface Payment {
+    id: number;
+    sale_id: number | null;
+    purchase_id: number | null;
+    payment_method_id: number;
+    amount: string;
+    paid_at: string;
+    cash_session_id: number | null;
+    note: string | null;
+
+    payment_method?: PaymentMethod;
+}
+
+export interface PaymentMethod {
+    id: number;
+    code: string;
+    name: string;
+    is_active: boolean;
+}
 
 export interface SalePagination {
     current_page: number;
     data: Sale[];
-    from: number;
+    from: number | null;
     last_page: number;
     per_page: number;
-    to: number;
+    to: number | null;
     total: number;
     links: PaginationLink[];
 }
