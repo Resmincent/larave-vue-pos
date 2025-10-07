@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->string('code')->unique();
-            $table->enum('status', ['OPEN', 'PAID', 'VOID'])->default('PAID');
+            $table->enum('status', ['OPEN', 'PAID', 'VOID'])->default('OPEN');
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('discount_total', 15, 2)->default(0);
             $table->decimal('tax_total', 15, 2)->default(0);

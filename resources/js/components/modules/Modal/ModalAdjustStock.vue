@@ -6,7 +6,7 @@ const props = defineProps<{
     show: boolean;
     product: {
         id: number;
-        name: string;
+        product_name: string;
         sku: string;
         unit: string;
         qty: number;
@@ -47,7 +47,7 @@ function submit() {
         <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
             <h2 class="mb-4 text-lg font-semibold text-gray-800">Adjust Stock</h2>
             <div v-if="props.product" class="mb-4 text-sm text-gray-600">
-                <p><strong>Product:</strong> {{ props.product.name }} ({{ props.product.sku }})</p>
+                <p><strong>Product:</strong> {{ props.product.product_name }} ({{ props.product.sku }})</p>
                 <p><strong>Current Stock:</strong> {{ props.product.qty }} {{ props.product.unit }}</p>
             </div>
 

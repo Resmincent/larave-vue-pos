@@ -18,7 +18,7 @@ export interface Product {
     tax_id: number | null;
     sell_price: number;
     cost_price: number;
-    unit: string; // << ganti jadi string
+    unit: string;
     is_active: boolean;
     created_at: string;
     updated_at: string;
@@ -27,7 +27,7 @@ export interface Product {
     // relations
     category?: Category | null;
     tax?: Tax | null;
-    inventory?: Inventory | null; // << tambah relasi inventory
+    inventory?: Inventory | null;
     stocks?: StockMovement[];
     saleItems?: SaleItem[];
     purchaseItems?: PurchaseItem[];
