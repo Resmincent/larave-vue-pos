@@ -10,11 +10,19 @@ import type { BreadcrumbItem } from '@/types';
 import type { Customer } from '@/types/customers';
 import type { Product } from '@/types/products';
 import type { PaymentMethod, StatusType } from '@/types/sales';
+import { Tax } from '@/types/tax';
 
 // kalkulasi (berguna untuk UX / validasi ringan)
 const subtotal = computed(() => form.items.reduce((s, it) => s + Number(it.sell_price) * Number(it.qty), 0));
 const discountTotal = computed(() => form.items.reduce((s, it) => s + Number(it.discount || 0), 0));
-const taxTotal = computed(() => form.items.reduce((s, it) => s + Number(it.tax || 0), 0));
+const taxTotal = computed(() =>
+    props.taxes.reduce((s, t) => {
+        const taxAmount = form.items
+            .filter((it) => it.tax_id === t.id)
+            .reduce((ts, it) => ts + ((Number(it.sell_price) * Number(it.qty) - Number(it.discount || 0)) * t.rate) / 100, 0);
+        return s + taxAmount;
+    }, 0),
+);
 const grandTotal = computed(() => subtotal.value - discountTotal.value + taxTotal.value);
 const paidTotal = computed(() => form.payments.reduce((s, p) => s + Number(p.amount || 0), 0));
 
@@ -28,6 +36,7 @@ const props = defineProps<{
     products: Product[];
     methods: PaymentMethod[];
     code: string;
+    taxes: Tax[];
 }>();
 
 type CreateSalePayload = {
@@ -40,7 +49,7 @@ type CreateSalePayload = {
         qty: number;
         sell_price: number;
         discount: number;
-        tax: number;
+        tax_id: number | null;
     }>;
     payments: Array<{
         payment_method_id: number | null;
@@ -54,13 +63,13 @@ const form = useForm<CreateSalePayload>({
     code: props.code,
     status: 'OPEN',
     note: null,
-    items: [{ product_id: null, qty: 1, sell_price: 0, discount: 0, tax: 0 }],
+    items: [{ product_id: null, qty: 1, sell_price: 0, discount: 0, tax_id: null }],
     payments: [{ payment_method_id: null, amount: 0, note: null }],
 });
 
 // ===== Helpers =====
 const addItem = () => {
-    form.items.push({ product_id: null, qty: 1, sell_price: 0, discount: 0, tax: 0 });
+    form.items.push({ product_id: null, qty: 1, sell_price: 0, discount: 0, tax_id: null });
 };
 const removeItem = (idx: number) => {
     if (form.items.length > 1) form.items.splice(idx, 1);
@@ -70,7 +79,9 @@ const addPayment = () => {
     form.payments.push({ payment_method_id: null, amount: 0, note: null });
 };
 const removePayment = (idx: number) => {
-    if (form.payments.length > 1) form.payments.splice(idx, 1);
+    if (form.payments.length > 1) {
+        form.payments.splice(idx, 1);
+    }
 };
 
 // auto set harga saat pilih product (kalau sell_price masih 0)
@@ -117,6 +128,7 @@ const submit = () => {
     });
 };
 </script>
+
 <template>
     <Head title="Create Sale" />
 
@@ -160,7 +172,7 @@ const submit = () => {
                                 v-model="form.code"
                                 disabled
                                 type="text"
-                                class="w-full rounded-md border px-3 py-2 text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
+                                class="w-full rounded-md border bg-gray-400 px-3 py-2 text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
                                 placeholder="e.g. S-2025-0001"
                             />
                             <div v-if="form.errors.code" class="mt-1 text-sm text-red-600">{{ form.errors.code }}</div>
@@ -272,25 +284,26 @@ const submit = () => {
                                         </div>
                                     </td>
 
-                                    <td class="px-3 py-2 text-right">
-                                        <input
-                                            v-model.number="it.tax"
-                                            type="number"
-                                            min="0"
-                                            step="any"
-                                            class="w-24 rounded-md border px-2 py-1.5 text-right text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
-                                        />
-                                        <div v-if="form.errors[`items.${idx}.tax`]" class="mt-1 text-xs text-red-600">
-                                            {{ form.errors[`items.${idx}.tax`] }}
+                                    <td class="px-3 py-2">
+                                        <select
+                                            v-model="it.tax_id"
+                                            class="w-24 rounded-md border px-2 py-1.5 text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
+                                        >
+                                            <option :value="null">— Select —</option>
+                                            <option v-for="p in props.taxes" :key="p.id" :value="p.id">{{ p.name }}</option>
+                                        </select>
+                                        <div v-if="form.errors[`items.${idx}.tax_id`]" class="mt-1 text-xs text-red-600">
+                                            {{ form.errors[`items.${idx}.tax_id`] }}
                                         </div>
                                     </td>
 
                                     <td class="px-3 py-2 text-right tabular-nums">
                                         {{
-                                            (Number(it.sell_price) * Number(it.qty) - Number(it.discount || 0) + Number(it.tax || 0)).toLocaleString(
-                                                'id-ID',
-                                                { style: 'currency', currency: 'IDR' },
-                                            )
+                                            (
+                                                Number(it.sell_price) * Number(it.qty) -
+                                                Number(it.discount || 0) +
+                                                Number(it.tax_id || 0)
+                                            ).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
                                         }}
                                     </td>
 

@@ -176,8 +176,8 @@ watchEffect(() => {
                             </tr>
                         </tbody>
                     </table>
-                    <Pagination :pagination="props.sales" class="p-4" />
                 </div>
+                <Pagination :pagination="props.sales" class="p-2" />
             </div>
         </div>
     </AppLayout>

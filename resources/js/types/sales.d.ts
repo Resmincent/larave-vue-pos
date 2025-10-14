@@ -26,9 +26,9 @@ export interface Sale {
     deleted_at?: string | null;
     note?: string | null;
 
-    customer?: Customer | null;
-    user?: User | null;
-    saleItems: SaleItem[];
+    customer?: Customer;
+    user?: User;
+    sale_items: SaleItem[];
     payments: Payment[];
 }
 

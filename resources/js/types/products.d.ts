@@ -55,6 +55,8 @@ export interface SaleItem {
     discount: number;
     tax_id: number | null;
     line_total: number;
+
+    product: Product;
 }
 
 export interface PurchaseItem {

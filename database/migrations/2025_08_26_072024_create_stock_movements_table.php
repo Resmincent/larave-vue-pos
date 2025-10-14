@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->bigInteger('qty_change');
-            $table->enum('type', ['SALE', 'PURCHASE', 'ADJUSTMENT', 'RETURN_SALE', 'RETURN_PURCHASE']);
+            $table->enum('type', ['SALE', 'RETURN_SALE']);
             $table->string('source_type')->nullable();
             $table->unsignedBigInteger('source_id')->nullable();
             $table->string('note')->nullable();
