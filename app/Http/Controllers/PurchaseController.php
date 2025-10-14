@@ -9,6 +9,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\StockMovement;
 use App\Models\Supply;
+use App\Models\Tax;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         $query = $request->string('query');
-        $purchases = Purchase::with(['supplier', 'user'])
+        $purchases = Purchase::with(['supplier', 'user:id,name'])
             ->when($query, fn($w) => $w->where('code', 'like', "%$query%"))
             ->orderByDesc('created_at')
             ->paginate(10)
@@ -41,6 +42,7 @@ class PurchaseController extends Controller
                 ['label' => 'Received', 'value' => Purchase::STATUS_RECEIVED],
                 ['label' => 'Cancelled', 'value' => Purchase::STATUS_CANCELLED],
             ],
+            'taxes' => Tax::orderBy('name')->get(['id', 'name', 'rate']),
         ]);
     }
 
@@ -63,29 +65,57 @@ class PurchaseController extends Controller
             'items.*.quantity' => 'required|numeric|min:1',
             'items.*.cost_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
-            'items.*.tax' => 'nullable|numeric|min:0',
+            'items.*.tax_id'      => 'nullable|exists:taxes,id',
         ]);
 
         DB::transaction(function () use ($data) {
+
+            $taxRates = collect($data['items'])
+                ->pluck('tax_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            $taxMap = $taxRates->isNotEmpty()
+                ? Tax::whereIn('id', $taxRates)->pluck('rate', 'id') // [tax_id => rate]
+                : collect();
+
             $subtotal = 0;
             $discountTotal = 0;
             $taxTotal = 0;
 
             foreach ($data['items'] as &$it) {
-                $it['discount'] = $it['discount'] ?? 0;
-                $it['tax'] = $it['tax'] ?? 0;
-                $it['line_total'] = ($it['cost_price'] * $it['qty'] - $it['discount'] + $it['tax']);
-                $subtotal += ($it['cost_price'] * $it['qty']);
-                $discountTotal += $it['discount'];
-                $taxTotal += $it['tax'];
+                $qty        = (int) ($it['qty'] ?? 0);
+                $price      = (float) ($it['cost_price'] ?? 0);
+                $discount   = (float) ($it['discount'] ?? 0);
+                $taxId      = $it['tax_id'] ?? null;
+
+                $lineBase   = ($price * $qty) - $discount;
+                $taxRate    = $taxId ? (float) ($taxMap[$taxId] ?? 0) : 0;
+                $taxAmount  = round($lineBase * ($taxRate / 100));
+
+                $lineTotal  = $lineBase + $taxAmount;
+
+                $subtotal      += ($price * $qty);
+                $discountTotal += $discount;
+                $taxTotal      += $taxAmount;
             }
+
+            $paymentItemsPayload[] = [
+                'product_id' => $it['product_id'],
+                'qty'        => $qty,
+                'price'      => $price,
+                'discount'   => $discount,
+                'tax_id'     => $taxId,
+                'line_total' => $lineTotal,
+            ];
 
             $grandTotal = $subtotal - $discountTotal + $taxTotal;
 
             $purchase = Purchase::create([
-                'supplier_id' => $data['supplier_id'],
+                'supplier_id' => $data['supplier_id'] ?? null,
                 'user_id' => Auth::id(),
-                'code' => $data['code'],
+                'code' => $data['code'] ?: Purchase::generateCode(),
                 'status' => $data['status'],
                 'subtotal' => $subtotal,
                 'discount_total' => $discountTotal,
@@ -95,16 +125,8 @@ class PurchaseController extends Controller
                 'note' => $data['note'] ?? null,
             ]);
 
-            foreach ($data['items'] as $it) {
-                PurchaseItem::create([
-                    'purchase_id' => $purchase->id,
-                    'product_id' => $it['product_id'],
-                    'qty' => $it['qty'],
-                    'cost_price' => $it['cost_price'],
-                    'discount' => $it['discount'],
-                    'tax' => $it['tax'],
-                    'line_total' => $it['line_total'],
-                ]);
+            foreach ($paymentItemsPayload as $row) {
+                PurchaseItem::create($row + ['purchase_id' => $purchase->id]);
             }
 
             if ($purchase->status === Purchase::STATUS_RECEIVED) {

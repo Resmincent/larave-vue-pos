@@ -29,7 +29,7 @@ class SaleController extends Controller
                 $q->select('id', 'user_id', 'phone', 'address')
                     ->with(['user:id,name']);
             },
-            'user:id,name', // cashier
+            'user:id,name',
         ])
             ->when($query, fn($w) => $w->where('code', 'like', "%{$query}%"))
             ->orderByDesc('sold_at')
@@ -39,8 +39,12 @@ class SaleController extends Controller
         return Inertia::render('sales/Index', [
             'sales'   => $sales,
             'filters' => ['query' => $query],
+            'methods' => PaymentMethod::where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'code']),
         ]);
     }
+
 
     public function create()
     {
@@ -67,14 +71,17 @@ class SaleController extends Controller
         $data = $request->validate([
             'customer_id'         => 'nullable|exists:customers,id',
             'code'                => 'required|string|unique:sales,code',
-            'status'              => 'required|in:' . implode(',', [Sale::STATUS_OPEN, Sale::STATUS_PAID, Sale::STATUS_VOID]),
+            'status'              => 'required|in:' . implode(',', [
+                Sale::STATUS_OPEN,
+                Sale::STATUS_PAID,
+                Sale::STATUS_VOID
+            ]),
             'note'                => 'nullable|string',
             'items'               => 'required|array|min:1',
             'items.*.product_id'  => 'required|exists:products,id',
             'items.*.qty'         => 'required|integer|min:1',
             'items.*.sell_price'  => 'required|numeric|min:0',
             'items.*.discount'    => 'nullable|numeric|min:0',
-            // gunakan tax_id sesuai model + tabel taxes
             'items.*.tax_id'      => 'nullable|exists:taxes,id',
             'payments'            => 'required|array|min:1',
             'payments.*.payment_method_id' => 'required|exists:payment_methods,id',
@@ -123,23 +130,9 @@ class SaleController extends Controller
                     'qty'        => $qty,
                     'price'      => $price,
                     'discount'   => $discount,
-                    'tax_id'     => $taxId,     // ikut model
-                    'line_total' => $lineTotal, // ikut model
-                ];
-
-                /* === ALTERNATIF JIKA FRONTEND KIRIM items[*].tax (angka), BUKAN tax_id ===
-                $taxAmount  = (float) ($it['tax'] ?? 0);
-                $lineTotal  = $lineBase + $taxAmount;
-                $taxTotal  += $taxAmount;
-                $saleItemsPayload[] = [
-                    'product_id' => $it['product_id'],
-                    'qty'        => $qty,
-                    'price'      => $price,
-                    'discount'   => $discount,
-                    'tax_id'     => null,       // tidak pakai tax_id
+                    'tax_id'     => $taxId,
                     'line_total' => $lineTotal,
                 ];
-                */
             }
 
             $grandTotal = $subtotal - $discountTotal + $taxTotal;
@@ -267,5 +260,67 @@ class SaleController extends Controller
                 'created_at'  => now(),
             ]);
         }
+    }
+
+    public function pay(Request $request, Sale $sale)
+    {
+        // validasi pembayaran baru yang masuk
+        $data = $request->validate([
+            'payments'                        => 'required|array|min:1',
+            'payments.*.payment_method_id'    => 'required|exists:payment_methods,id',
+            'payments.*.amount'               => 'required|numeric|min:0',
+            'payments.*.note'                 => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($sale, $data) {
+            // lock baris sale agar aman dari race condition
+            $sale = Sale::whereKey($sale->id)->lockForUpdate()->first();
+
+            if ($sale->status === Sale::STATUS_VOID) {
+                abort(422, 'Transaksi sudah VOID dan tidak bisa dibayar.');
+            }
+            if ($sale->status === Sale::STATUS_PAID) {
+                abort(422, 'Transaksi sudah PAID.');
+            }
+
+            $wasOpen = ($sale->status === Sale::STATUS_OPEN);
+
+            // simpan pembayaran baru
+            $additionalPaid = collect($data['payments'])->sum('amount');
+            foreach ($data['payments'] as $p) {
+                Payment::create([
+                    'payment_method_id' => $p['payment_method_id'],
+                    'sale_id'           => $sale->id,
+                    'purchase_id'       => null,
+                    'amount'            => $p['amount'],
+                    'paid_at'           => now(),
+                    'cash_session_id'   => null,
+                    'note'              => $p['note'] ?? null,
+                ]);
+            }
+
+            // hitung total bayar terbaru & tentukan status
+            $newPaidTotal = ($sale->paid_total ?? 0) + $additionalPaid;
+            $changeDue    = max(0, $newPaidTotal - $sale->grand_total);
+            $newStatus    = $newPaidTotal >= $sale->grand_total
+                ? Sale::STATUS_PAID
+                : Sale::STATUS_OPEN;
+
+            // update kolom-kolom sale
+            $sale->update([
+                'paid_total' => $newPaidTotal,
+                'change_due' => $changeDue,
+                'status'     => $newStatus,
+                'sold_at'    => $newStatus === Sale::STATUS_PAID ? now() : $sale->sold_at,
+            ]);
+
+            // potong stok HANYA ketika berpindah dari OPEN → PAID
+            if ($wasOpen && $newStatus === Sale::STATUS_PAID) {
+                $this->reduceStockForPaidSale($sale);
+            }
+        });
+
+        return redirect()->route('sales.index', $sale)
+            ->with('success', 'Pembayaran disimpan. Status transaksi diperbarui.');
     }
 }

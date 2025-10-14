@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ModalPay from '@/components/modules/Modal/ModalPay.vue';
+import ModalVoid from '@/components/modules/Modal/ModalVoid.vue';
 import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import sale from '@/routes/sales';
@@ -10,9 +12,17 @@ import { computed, h, ref, watch, watchEffect } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Sales', href: sale.index().url }];
 
-const props = defineProps<{ sales: SalePagination; filters: { query?: string } }>();
+// [NEW] tipe minimal untuk metode pembayaran
+type PaymentMethod = { id: number; name: string; code: string };
+
+// [CHANGED] tambah props.methods
+const props = defineProps<{ sales: SalePagination; filters: { query?: string }; methods: PaymentMethod[] }>();
 
 const search = ref(props.filters.query || '');
+
+const showPay = ref(false);
+const showVoid = ref(false);
+const activeSale = ref<{ id: number; code: string; grandTotal: number; paidTotal: number; status?: string } | null>(null);
 
 // --- debounce search ---
 let t: any = null;
@@ -25,7 +35,6 @@ watch(search, (value) => {
 
 // --- helper format ---
 const fmtIDR = (n: number | string | null | undefined) => `Rp${Number(n ?? 0).toLocaleString('id-ID')}`;
-
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-');
 
 // --- normalisasi data untuk tabel ---
@@ -36,15 +45,29 @@ const items = computed(() =>
         customerId: item.customer?.user.name ?? '-',
         userId: item.user?.name ?? '-',
         status: String(item.status || '').toLowerCase(),
-        subtotal: item.subtotal,
-        discountTotal: item.discount_total,
-        taxTotal: item.tax_total,
-        grandTotal: item.grand_total,
-        paidTotal: item.paid_total,
-        changeDue: item.change_due,
+
+        // PAKSA NUMBER
+        subtotal: Number(item.subtotal ?? 0),
+        discountTotal: Number(item.discount_total ?? 0),
+        taxTotal: Number(item.tax_total ?? 0),
+        grandTotal: Number(item.grand_total ?? 0),
+        paidTotal: Number(item.paid_total ?? 0),
+        changeDue: Number(item.change_due ?? 0),
+
         soldAt: item.sold_at,
     })),
 );
+
+function openPay(row: any) {
+    activeSale.value = {
+        id: Number(row.id),
+        code: String(row.code),
+        grandTotal: Number(row.grandTotal ?? row.grand_total ?? 0),
+        paidTotal: Number(row.paidTotal ?? row.paid_total ?? 0),
+        status: row.status,
+    };
+    showPay.value = true;
+}
 
 const columnHelper = createColumnHelper<any>();
 
@@ -68,6 +91,12 @@ const getStatusBadge = (status: string) => {
     );
 };
 
+function openVoid(row: any) {
+    activeSale.value = { id: row.id, code: row.code, grandTotal: row.grandTotal, paidTotal: row.paidTotal, status: row.status };
+    showVoid.value = true;
+}
+
+// --- kolom tabel ---
 const columns = [
     columnHelper.accessor('code', { header: 'Code' }),
     columnHelper.accessor('customerId', { header: 'Customer' }),
@@ -76,40 +105,30 @@ const columns = [
         header: 'Status',
         cell: (info) => getStatusBadge(info.getValue() as string),
     }),
-    columnHelper.accessor('changeDue', {
-        header: 'Change Due',
-        cell: (info) => fmtIDR(info.getValue()),
-    }),
-    columnHelper.accessor('soldAt', {
-        header: 'Date Sold',
-        cell: (info) => fmtDate(info.getValue()),
-    }),
-    columnHelper.accessor('subtotal', {
-        header: 'Sub Total',
-        cell: (info) => fmtIDR(info.getValue()),
-    }),
-    columnHelper.accessor('discountTotal', {
-        header: 'Discount',
-        cell: (info) => fmtIDR(info.getValue()),
-    }),
-    columnHelper.accessor('taxTotal', {
-        header: 'Tax',
-        cell: (info) => fmtIDR(info.getValue()),
-    }),
-    columnHelper.accessor('paidTotal', {
-        header: 'Paid Total',
-        cell: (info) => fmtIDR(info.getValue()),
-    }),
-    columnHelper.accessor('grandTotal', {
-        header: 'Grand Total',
-        cell: (info) => fmtIDR(info.getValue()),
-    }),
+    columnHelper.accessor('changeDue', { header: 'Change Due', cell: (info) => fmtIDR(info.getValue()) }),
+    columnHelper.accessor('soldAt', { header: 'Date Sold', cell: (info) => fmtDate(info.getValue()) }),
+    columnHelper.accessor('subtotal', { header: 'Sub Total', cell: (info) => fmtIDR(info.getValue()) }),
+    columnHelper.accessor('discountTotal', { header: 'Discount', cell: (info) => fmtIDR(info.getValue()) }),
+    columnHelper.accessor('taxTotal', { header: 'Tax', cell: (info) => fmtIDR(info.getValue()) }),
+    columnHelper.accessor('paidTotal', { header: 'Paid Total', cell: (info) => fmtIDR(info.getValue()) }),
+    columnHelper.accessor('grandTotal', { header: 'Grand Total', cell: (info) => fmtIDR(info.getValue()) }),
     columnHelper.display({
         id: 'actions',
         header: 'Actions',
         cell: (info) => {
-            const id = info.row.original.id;
-            return h('div', { class: 'flex gap-4' }, [h('a', { href: sale.show(id).url, class: 'text-cyan-600 hover:underline' }, 'View')]);
+            const row = info.row.original as any;
+            const id = row.id;
+
+            // tombol: View | Pay (jika OPEN) | Void (jika bukan VOID)
+            return h('div', { class: 'flex gap-3' }, [
+                h('a', { href: sale.show(id).url, class: 'text-cyan-600 hover:underline' }, 'View'),
+                row.status === 'open'
+                    ? h('button', { class: 'text-green-700 hover:underline', type: 'button', onClick: () => openPay(row) }, 'Pay')
+                    : null,
+                row.status !== 'void'
+                    ? h('button', { class: 'text-red-700 hover:underline', type: 'button', onClick: () => openVoid(row) }, 'Void')
+                    : null,
+            ]);
         },
     }),
 ];
@@ -177,8 +196,19 @@ watchEffect(() => {
                         </tbody>
                     </table>
                 </div>
+
                 <Pagination :pagination="props.sales" class="p-2" />
             </div>
         </div>
+        <ModalPay
+            :key="activeSale?.id ?? 'pay'"
+            :show="showPay"
+            :methods="props.methods"
+            :sale="activeSale"
+            @close="showPay = false"
+            @saved="$inertia.reload({ only: ['sales'] })"
+        />
+
+        <ModalVoid :show="showVoid" :sale="activeSale" @close="showVoid = false" @saved="$inertia.reload({ only: ['sales'] })" />
     </AppLayout>
 </template>

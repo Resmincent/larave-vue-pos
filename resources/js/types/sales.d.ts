@@ -13,12 +13,12 @@ export interface Sale {
     user_id: number;
     status: StatusType;
 
-    subtotal: string;
-    discount_total: string;
-    tax_total: string;
-    grand_total: string;
-    paid_total: string;
-    change_due: string;
+    subtotal: number;
+    discount_total: number;
+    tax_total: number;
+    grand_total: number;
+    paid_total: number;
+    change_due: number;
 
     sold_at: string | null;
     created_at: string;

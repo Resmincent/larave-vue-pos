@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Purchase extends Model
 {
@@ -51,5 +52,23 @@ class Purchase extends Model
     public function purchaseItems()
     {
         return $this->hasMany(PurchaseItem::class, 'purchase_id', 'id');
+    }
+
+    public static function generateCode(?Carbon $now = null)
+    {
+        $now ??= Carbon::now();
+        $prefix = 'PUR-' . $now->format('Y') . '-';
+
+        $lastCode = static::where('code', 'like', $prefix . '%')
+            ->orderByDesc('code')
+            ->value('code');
+
+        $sequence = 1;
+        if ($lastCode) {
+            $lastSequence = (int)substr($lastCode, strlen($prefix));
+            $sequence = $lastSequence + 1;
+        }
+
+        return $prefix . str_pad((string)$sequence, 4, '0', STR_PAD_LEFT);
     }
 }

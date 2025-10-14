@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Sales
     Route::resource('sales', SaleController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('sales/{sale}/void', [SaleController::class, 'void'])->name('sales.void');
+    Route::patch('/sales/{sale}/pay', [SaleController::class, 'pay'])->name('sales.pay');
 });
 
 require __DIR__ . '/settings.php';

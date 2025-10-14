@@ -29,7 +29,18 @@ class Sale extends Model
         'note',
     ];
 
-    protected $casts = ['sold_at' => 'datetime'];
+
+    // App\Models\Sale.php
+    protected $casts = [
+        'subtotal'        => 'int',
+        'discount_total'  => 'int',
+        'tax_total'       => 'int',
+        'grand_total'     => 'int',
+        'paid_total'      => 'int',
+        'change_due'      => 'int',
+        'sold_at' => 'datetime'
+    ];
+
 
     public const STATUS_OPEN = 'OPEN';
     public const STATUS_PAID = 'PAID';
