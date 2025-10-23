@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PurchaseController extends Controller
@@ -169,5 +170,78 @@ class PurchaseController extends Controller
                 'purchase' => $purchase,
             ]
         );
+    }
+
+    public function updateStatus(Request $request, Purchase $purchase)
+    {
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                Rule::in([Purchase::STATUS_RECEIVED, Purchase::STATUS_CANCELLED]),
+            ],
+        ]);
+
+        // Cek apakah status purchase received
+        if ($purchase->status !== Purchase::STATUS_RECEIVED) {
+            return back()->with('error', 'Hanya pembelian berstatus Draft yang bisa diubah.');
+        }
+
+        // Cek apakah itemsnya kosong atau 0
+        $itemsCount = $purchase->purchaseItems()->count();
+        if ($itemsCount === 0) {
+            return back()->with('error', 'Tidak bisa mengubah status karena tidak ada item pada pembelian ini.');
+        }
+
+        DB::transaction(function () use ($purchase, $validated) {
+            $target = $validated['status'];
+
+            if ($target === Purchase::STATUS_RECEIVED) {
+                // Ambil item yang diperlukan untuk update stok
+                $items = $purchase->items()->get(['product_id', 'qty']);
+
+                foreach ($items as $it) {
+                    // Kunci baris inventory per product untuk konsistensi
+                    $inv = Inventory::where('product_id', $it->product_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$inv) {
+                        $inv = Inventory::create([
+                            'product_id' => $it->product_id,
+                            'qty'        => 0,
+                        ]);
+                    }
+
+                    $inv->qty += (int) $it->qty;
+                    $inv->save();
+
+                    // Catat pergerakan stok (IN)
+                    StockMovement::create([
+                        'product_id'  => $it->product_id,
+                        'qty_change'  => (int) $it->qty,
+                        'type'        => 'IN',
+                        'source_type' => Purchase::class,
+                        'source_id'   => $purchase->id,
+                        'note'        => 'Purchase received: ' . $purchase->code,
+                    ]);
+                }
+
+                // Update status & timestamp penerimaan
+                $purchase->update([
+                    'status'      => Purchase::STATUS_RECEIVED,
+                    'received_at' => now(),
+                ]);
+            } elseif ($target === Purchase::STATUS_CANCELLED) {
+                $purchase->update([
+                    'status'      => Purchase::STATUS_CANCELLED,
+                    'received_at' => null,
+                ]);
+            }
+        });
+
+
+        return redirect()
+            ->route('purchases.index')
+            ->with('success', 'Status purchase berhasil diubah ke ' . strtoupper($validated['status']));
     }
 }
