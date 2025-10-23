@@ -11,15 +11,20 @@ class RoleController extends Controller
 {
     public function index(Request $request)
     {
-        $query = $request->string('query');
-        $roles = Role::when($query, fn($w) => $w->where('name', 'like', "%$query%"))
+        $query = $request->input('query');
+
+        $roles = Role::with(['permissions:id,name'])
+            ->when(
+                filled($query),
+                fn($q) =>
+                $q->where('name', 'like', "%{$query}%")
+            )
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('roles/Index', [
+        return Inertia('roles/Index', [
             'roles' => $roles,
-            'filters' => ['query' => $query],
         ]);
     }
 

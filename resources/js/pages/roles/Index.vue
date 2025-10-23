@@ -28,6 +28,7 @@ const items = computed(() =>
     props.roles.data.map((item) => ({
         id: item.id,
         name: item.name,
+        permissions: (item.permissions ?? []).map((p: any) => ({ id: p.id, name: p.name })),
     })),
 );
 
@@ -71,7 +72,7 @@ const columns = [
             }
             if (role.permissions && role.permissions.length > 0) {
                 return role.permissions.map((p: any) =>
-                    h('span', { class: 'inline-block rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 mr-1 mb-1' }, p.name),
+                    h('span', { class: 'inline-block rounded bg-blue-100 px-2 py-0.5 text-xs text-cyan-800 mr-1 mb-1' }, p.name),
                 );
             }
             return h('span', { class: 'text-gray-500' }, 'No Permissions');

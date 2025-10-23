@@ -28,9 +28,9 @@ const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleString('id-
 const getStatusBadge = (status: string) => {
     const s = String(status || '').toLowerCase();
     const map: Record<string, { label: string; cls: string }> = {
-        open: { label: 'Draft', cls: 'bg-amber-100 text-amber-800 border-amber-300' },
-        paid: { label: 'Received', cls: 'bg-green-100 text-green-800 border-green-300' },
-        void: { label: 'Cancelled', cls: 'bg-red-100 text-red-800 border-red-300' },
+        draft: { label: 'Draft', cls: 'bg-amber-100 text-amber-800 border-amber-300' },
+        receive: { label: 'Received', cls: 'bg-green-100 text-green-800 border-green-300' },
+        cancel: { label: 'Cancelled', cls: 'bg-red-100 text-red-800 border-red-300' },
     };
     const m = map[s] ?? { label: String(status).toUpperCase(), cls: 'bg-gray-100 text-gray-800 border-gray-300' };
 
@@ -86,11 +86,11 @@ const columns = [
             const id = row.id;
             return h('div', { class: 'flex gap-3' }, [
                 h('a', { href: purchase.show(id).url, class: 'text-cyan-600 hover:underline' }, 'View'),
-                // row.status === 'open'
-                //     ? h('button', { class: 'text-green-700 hover:underline', type: 'button', onClick: () => openPay(row) }, 'Pay')
+                // row.status === 'draft'
+                //     ? h('button', { class: 'text-green-700 hover:underline', type: 'button', onClick: () => openPay(row) }, 'Received')
                 //     : null,
-                // row.status !== 'void'
-                //     ? h('button', { class: 'text-red-700 hover:underline', type: 'button', onClick: () => openVoid(row) }, 'Void')
+                // row.status !== cancel'
+                //     ? h('button', { class: 'text-red-700 hover:underline', type: 'button', onClick: () => openVoid(row) }, 'Cancel')
                 //     : null,
             ]);
         },
