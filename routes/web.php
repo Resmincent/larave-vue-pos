@@ -59,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('sales', SaleController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('sales/{sale}/void', [SaleController::class, 'void'])->name('sales.void');
     Route::patch('/sales/{sale}/pay', [SaleController::class, 'pay'])->name('sales.pay');
+
+    // Purchase Update
+    Route::patch('purchases/{purchase}/status', [PurchaseController::class, 'updateStatus'])->name('purchases.updateStatus');
 });
 
 require __DIR__ . '/settings.php';
