@@ -28,9 +28,9 @@ const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleString('id-
 const getStatusBadge = (status: string) => {
     const s = String(status || '').toLowerCase();
     const map: Record<string, { label: string; cls: string }> = {
-        open: { label: 'Open', cls: 'bg-amber-100 text-amber-800 border-amber-300' },
-        paid: { label: 'Paid', cls: 'bg-green-100 text-green-800 border-green-300' },
-        void: { label: 'Void', cls: 'bg-red-100 text-red-800 border-red-300' },
+        open: { label: 'Draft', cls: 'bg-amber-100 text-amber-800 border-amber-300' },
+        paid: { label: 'Received', cls: 'bg-green-100 text-green-800 border-green-300' },
+        void: { label: 'Cancelled', cls: 'bg-red-100 text-red-800 border-red-300' },
     };
     const m = map[s] ?? { label: String(status).toUpperCase(), cls: 'bg-gray-100 text-gray-800 border-gray-300' };
 

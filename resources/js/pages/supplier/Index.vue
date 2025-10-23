@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ModalDelete from '@/components/modules/Modal/ModalDelete.vue';
 import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import supplier from '@/routes/suppliers';
@@ -21,6 +22,14 @@ const props = defineProps<{
 }>();
 
 const search = ref(props.filters.query || '');
+
+const modal = ref<InstanceType<typeof ModalDelete> | null>(null);
+
+function deleteSupploer(id: number) {
+    modal.value?.open('Are you sure you want to delete this user customer?', () => {
+        router.delete(supplier.destroy(id).url);
+    });
+}
 
 watch(search, (value) => {
     router.get(supplier.index().url, { query: value }, { preserveState: true, replace: true });
@@ -74,6 +83,7 @@ const columns = [
                     {
                         type: 'button',
                         class: 'text-red-600 hover:text-red-800',
+                        onClick: () => deleteSupploer(id),
                     },
                     'Delete',
                 ),
@@ -88,7 +98,7 @@ const tableData = useVueTable({
     getCoreRowModel: getCoreRowModel(),
 });
 
-console.log('data: ', items.value);
+// console.log('data: ', items.value);
 </script>
 
 <template>
@@ -140,6 +150,7 @@ console.log('data: ', items.value);
                     <Pagination :pagination="props.suppliers" class="p-2" />
                 </div>
             </div>
+            <ModalDelete ref="modal" />
         </div>
     </AppLayout>
 </template>
