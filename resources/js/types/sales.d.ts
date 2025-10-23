@@ -73,3 +73,22 @@ export interface SalePagination {
     total: number;
     links: PaginationLink[];
 }
+
+export type CreateSalePayload = {
+    customer_id: number | null;
+    code: string;
+    status: StatusType;
+    note: string | null;
+    items: Array<{
+        product_id: number | null;
+        qty: number;
+        sell_price: number;
+        discount: number;
+        tax_id: number | null;
+    }>;
+    payments: Array<{
+        payment_method_id: number | null;
+        amount: number;
+        note: string | null;
+    }>;
+};

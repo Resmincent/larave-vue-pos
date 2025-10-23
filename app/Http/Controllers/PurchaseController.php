@@ -10,6 +10,7 @@ use App\Models\PurchaseItem;
 use App\Models\StockMovement;
 use App\Models\Supply;
 use App\Models\Tax;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +36,12 @@ class PurchaseController extends Controller
     public function create()
     {
         return Inertia('purchases/Create', [
-            'suppliers' => Supply::orderBy('name')->get(['id', 'name']),
+            'suppliers' => Supply::select('id', 'user_id')
+                ->with(['user:id,name,email'])
+                ->orderBy(
+                    User::select('name')->whereColumn('users.id', 'suppliers.user_id')
+                )
+                ->get(),
             'products' => Product::orderBy('name')->get(['id', 'name', 'sku', 'cost_price', 'sell_price', 'unit']),
             'statuses' => [
                 ['label' => 'Draft', 'value' => Purchase::STATUS_DRAFT],
@@ -43,6 +49,7 @@ class PurchaseController extends Controller
                 ['label' => 'Cancelled', 'value' => Purchase::STATUS_CANCELLED],
             ],
             'taxes' => Tax::orderBy('name')->get(['id', 'name', 'rate']),
+            'code' => Purchase::generateCode(),
         ]);
     }
 

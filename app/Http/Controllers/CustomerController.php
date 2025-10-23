@@ -59,7 +59,12 @@ class CustomerController extends Controller
         // 2. Assign role Customer
         $user->assignRole('Customer');
 
-        // 3. Buat profile customer
+        // 3. Generate custom id
+        $customId = $user->generateCustomId();
+        $user->custom_id = $customId;
+        $user->save();
+
+        // 4. Buat profile customer
         Customer::create([
             'user_id' => $user->id,
             'address' => $data['address'],

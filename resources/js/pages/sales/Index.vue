@@ -5,17 +5,15 @@ import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import sale from '@/routes/sales';
 import type { BreadcrumbItem } from '@/types';
-import type { SalePagination } from '@/types/sales';
+import type { PaymentMethod, SalePagination } from '@/types/sales';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
 import { computed, h, ref, watch, watchEffect } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Sales', href: sale.index().url }];
 
-// [NEW] tipe minimal untuk metode pembayaran
-type PaymentMethod = { id: number; name: string; code: string };
+// type PaymentMethod = { id: number; name: string; code: string };
 
-// [CHANGED] tambah props.methods
 const props = defineProps<{ sales: SalePagination; filters: { query?: string }; methods: PaymentMethod[] }>();
 
 const search = ref(props.filters.query || '');
@@ -45,8 +43,6 @@ const items = computed(() =>
         customerId: item.customer?.user.name ?? '-',
         userId: item.user?.name ?? '-',
         status: String(item.status || '').toLowerCase(),
-
-        // PAKSA NUMBER
         subtotal: Number(item.subtotal ?? 0),
         discountTotal: Number(item.discount_total ?? 0),
         taxTotal: Number(item.tax_total ?? 0),

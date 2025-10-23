@@ -73,7 +73,7 @@ class User extends Authenticatable
 
     public function suppliers()
     {
-        return $this->hasMany(Supply::class, 'user_id', 'id');
+        return $this->hasOne(Supply::class, 'user_id', 'id');
     }
 
     public function generateCustomId()

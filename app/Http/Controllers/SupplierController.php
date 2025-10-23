@@ -15,8 +15,18 @@ class SupplierController extends Controller
     public function index(Request $request)
     {
         $query = $request->string('query');
-        $suppliers = Supply::with('user')->when($query, fn($w) => $w->where('name', 'like', "%$query%"))
-            ->orderBy(Supply::select('name')->join('users', 'users.id', '=', 'suppliers.user_id'))
+
+        $suppliers = Supply::with('user.roles')
+            ->whereHas('user.roles', fn($q) => $q->where('name', 'Supplier'))
+            ->when(
+                $query,
+                fn($w) =>
+                $w->whereHas('user', fn($u) =>
+                $u->where('name', 'like', "%$query"))
+            )
+            ->join('users', 'users.id', '=', 'suppliers.user_id')
+            ->select('suppliers.*', 'users.name as user_name')
+            ->orderBy('users.name')
             ->paginate(10)
             ->withQueryString();
 
@@ -52,7 +62,12 @@ class SupplierController extends Controller
         // 2. Assign role Supplier
         $user->assignRole('Supplier');
 
-        // 3. Buat profile supplier
+        // 3. Generate custom id
+        $customId = $user->generateCustomId();
+        $user->custom_id = $customId;
+        $user->save();
+
+        // 4. Buat profile supplier
         Supply::create([
             'user_id' => $user->id,
             'name' => $data['name'],
