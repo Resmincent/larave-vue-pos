@@ -55,7 +55,7 @@ class SaleController extends Controller
                     User::select('name')->whereColumn('users.id', 'customers.user_id')
                 )
                 ->get(),
-            'products' => Product::get(['id', 'sku', 'name', 'unit', 'sell_price']),
+            'products' => Product::get(['id', 'sku', 'name', 'unit', 'sell_price', 'is_active']),
             'methods'  => PaymentMethod::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']),
             'taxes'    => Tax::orderBy('name')->get(['id', 'name', 'rate']),
             'code'     => Sale::generateCode(),

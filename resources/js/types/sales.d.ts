@@ -85,6 +85,7 @@ export type CreateSalePayload = {
         sell_price: number;
         discount: number;
         tax_id: number | null;
+        is_active: boolean;
     }>;
     payments: Array<{
         payment_method_id: number | null;

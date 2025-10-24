@@ -24,6 +24,8 @@ const taxTotal = computed(() =>
 const grandTotal = computed(() => subtotal.value - discountTotal.value + taxTotal.value);
 const paidTotal = computed(() => form.payments.reduce((s, p) => s + Number(p.amount || 0), 0));
 
+const activeProducts = computed(() => props.products.filter((p) => (p as any).is_active));
+
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Sales', href: sales.index().url },
     { title: 'Create Sale', href: sales.create().url },
@@ -42,13 +44,13 @@ const form = useForm<CreateSalePayload>({
     code: props.code,
     status: 'OPEN',
     note: null,
-    items: [{ product_id: null, qty: 1, sell_price: 0, discount: 0, tax_id: null }],
+    items: [{ product_id: null, qty: 1, sell_price: 0, discount: 0, tax_id: null, is_active: true }],
     payments: [{ payment_method_id: null, amount: 0, note: null }],
 });
 
 // ===== Helpers =====
 const addItem = () => {
-    form.items.push({ product_id: null, qty: 1, sell_price: 0, discount: 0, tax_id: null });
+    form.items.push({ product_id: null, qty: 1, sell_price: 0, discount: 0, tax_id: null, is_active: true });
 };
 const removeItem = (idx: number) => {
     if (form.items.length > 1) form.items.splice(idx, 1);
@@ -67,6 +69,16 @@ const removePayment = (idx: number) => {
 const onPickProduct = (idx: number) => {
     const row = form.items[idx];
     const prod = props.products.find((p) => p.id === row.product_id);
+
+    if (!prod) return;
+
+    //  Tidak boleh pilih non aktif
+    if (!prod.is_active) {
+        row.product_id = null;
+        return;
+    }
+
+    // isi harga default saat dipilih
     if (prod && (!row.sell_price || row.sell_price === 0)) {
         row.sell_price = Number((prod as any).sell_price ?? 0);
     }
@@ -83,6 +95,19 @@ watch(
                     // set selalu, atau pakai kondisi jika hanya saat 0
                     row.sell_price = Number((prod as any).sell_price ?? 0);
                 }
+            }
+        });
+    },
+    { deep: false },
+);
+
+watch(
+    () => form.items.map((it) => it.product_id),
+    () => {
+        form.items.forEach((row) => {
+            const prod = props.products.find((p) => p.id === row.product_id);
+            if (prod && !(prod as any).is_active) {
+                row.product_id = null; // reset karena tidak boleh pilih produk non-aktif
             }
         });
     },
@@ -213,7 +238,9 @@ const submit = () => {
                                             class="w-72 rounded-md border px-2 py-1.5 text-black focus:border-cyan-500 focus:ring focus:ring-cyan-200"
                                         >
                                             <option :value="null">— Select —</option>
-                                            <option v-for="p in props.products" :key="p.id" :value="p.id">{{ p.sku }} — {{ p.name }}</option>
+                                            <option v-for="c in activeProducts" :key="c.id" :value="c.id" class="text-sm text-black">
+                                                {{ c.sku }} — {{ c.name }}
+                                            </option>
                                         </select>
                                         <div v-if="form.errors[`items.${idx}.product_id`]" class="mt-1 text-xs text-red-600">
                                             {{ form.errors[`items.${idx}.product_id`] }}
